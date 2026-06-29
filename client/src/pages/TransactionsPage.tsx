@@ -30,7 +30,7 @@ export function SalesPage() {
     { key: 'customer', header: 'Customer', sortable: true },
     { key: 'items', header: 'Items' },
     { key: 'total', header: 'Total', render: (item: typeof mockSales[0]) => (
-      <span className="font-medium">\u20B9 {item.total.toLocaleString('en-IN')}</span>
+      <span className="font-medium">₹ {item.total.toLocaleString('en-IN')}</span>
     )},
     { key: 'status', header: 'Status', render: (item: typeof mockSales[0]) => (
       <StatusBadge status={item.status} />
@@ -197,7 +197,7 @@ function SalesVoucherModal({ open, onClose, onSave }: SalesVoucherModalProps) {
                   />
                 </td>
                 <td className="px-4 py-2 text-right font-medium">
-                  \u20B9 {(item.quantity * item.rate).toLocaleString('en-IN')}
+                  ₹ {(item.quantity * item.rate).toLocaleString('en-IN')}
                 </td>
               </tr>
             ))}
@@ -214,16 +214,16 @@ function SalesVoucherModal({ open, onClose, onSave }: SalesVoucherModalProps) {
         <div className="w-64 space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-slate-500">Subtotal</span>
-            <span>\u20B9 {subtotal.toLocaleString('en-IN')}</span>
+            <span>₹ {subtotal.toLocaleString('en-IN')}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-slate-500">GST (18%)</span>
-            <span>\u20B9 {gst.toLocaleString('en-IN')}</span>
+            <span>₹ {gst.toLocaleString('en-IN')}</span>
           </div>
           <hr className="border-slate-200 dark:border-slate-700" />
           <div className="flex justify-between font-bold">
             <span>Total</span>
-            <span>\u20B9 {total.toLocaleString('en-IN')}</span>
+            <span>₹ {total.toLocaleString('en-IN')}</span>
           </div>
         </div>
       </div>
@@ -248,7 +248,7 @@ export function PurchasesPage() {
     { key: 'supplier', header: 'Supplier', sortable: true },
     { key: 'items', header: 'Items' },
     { key: 'total', header: 'Total', render: (item: typeof mockPurchases[0]) => (
-      <span className="font-medium">\u20B9 {item.total.toLocaleString('en-IN')}</span>
+      <span className="font-medium">₹ {item.total.toLocaleString('en-IN')}</span>
     )},
     { key: 'status', header: 'Status', render: (item: typeof mockPurchases[0]) => (
       <StatusBadge status={item.status} />
@@ -303,9 +303,9 @@ export function ReceiptsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-success-600">\u20B9 12.5L</p><p className="text-sm text-slate-500 mt-1">This Month</p></CardContent></Card>
+        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-success-600">₹ 12.5L</p><p className="text-sm text-slate-500 mt-1">This Month</p></CardContent></Card>
         <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-slate-900 dark:text-white">45</p><p className="text-sm text-slate-500 mt-1">Transactions</p></CardContent></Card>
-        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-warning-600">\u20B9 18.4L</p><p className="text-sm text-slate-500 mt-1">Outstanding</p></CardContent></Card>
+        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-warning-600">₹ 18.4L</p><p className="text-sm text-slate-500 mt-1">Outstanding</p></CardContent></Card>
       </div>
 
       <Card>
@@ -332,7 +332,7 @@ export function ReceiptsPage() {
                   <td className="px-4 py-3">{r.date}</td>
                   <td className="px-4 py-3">{r.customer}</td>
                   <td className="px-4 py-3">{r.mode}</td>
-                  <td className="px-4 py-3 text-right font-medium">\u20B9 {r.amount.toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3 text-right font-medium">₹ {r.amount.toLocaleString('en-IN')}</td>
                 </tr>
               ))}
             </tbody>
@@ -360,9 +360,9 @@ export function PaymentsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-error-600">\u20B9 8.2L</p><p className="text-sm text-slate-500 mt-1">This Month</p></CardContent></Card>
+        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-error-600">₹ 8.2L</p><p className="text-sm text-slate-500 mt-1">This Month</p></CardContent></Card>
         <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-slate-900 dark:text-white">32</p><p className="text-sm text-slate-500 mt-1">Transactions</p></CardContent></Card>
-        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-warning-600">\u20B9 8.9L</p><p className="text-sm text-slate-500 mt-1">Outstanding</p></CardContent></Card>
+        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-warning-600">₹ 8.9L</p><p className="text-sm text-slate-500 mt-1">Outstanding</p></CardContent></Card>
       </div>
 
       <Card>

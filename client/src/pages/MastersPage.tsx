@@ -30,7 +30,7 @@ export function CustomersPage() {
     )},
     { key: 'address', header: 'Location' },
     { key: 'outstanding', header: 'Outstanding', render: (item: Customer) => (
-      <span className="font-medium">\u20B9 {item.outstanding.toLocaleString('en-IN')}</span>
+      <span className="font-medium">₹ {item.outstanding.toLocaleString('en-IN')}</span>
     )},
   ];
 
@@ -190,7 +190,7 @@ export function SuppliersPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500">Outstanding</p>
-                  <p className="font-semibold text-slate-900 dark:text-white">\u20B9 {supplier.outstanding.toLocaleString('en-IN')}</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">₹ {supplier.outstanding.toLocaleString('en-IN')}</p>
                 </div>
               </div>
             </CardContent>
@@ -220,7 +220,7 @@ export function StockItemsPage() {
         {item.quantity}
       </span>
     )},
-    { key: 'saleRate', header: 'Sale Rate', render: (item: typeof mockItems[0]) => <span>\u20B9 {item.saleRate.toLocaleString('en-IN')}</span> },
+    { key: 'saleRate', header: 'Sale Rate', render: (item: typeof mockItems[0]) => <span>₹ {item.saleRate.toLocaleString('en-IN')}</span> },
   ];
 
   return (

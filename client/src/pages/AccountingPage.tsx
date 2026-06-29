@@ -1,6 +1,5 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, Button } from '../components/ui';
-import { useApp } from '../context/AppContext';
+// import { useApp } from '../context/AppContext';
 import { FileText, Calculator, TrendingUp, TrendingDown } from 'lucide-react';
 
 export function TrialBalancePage() {
@@ -41,8 +40,8 @@ export function TrialBalancePage() {
             <thead className="bg-slate-50 dark:bg-slate-800/50">
               <tr>
                 <th className="px-4 py-3 text-left font-medium text-slate-500">Ledger</th>
-                <th className="px-4 py-3 text-right font-medium text-slate-500">Debit (\u20B9)</th>
-                <th className="px-4 py-3 text-right font-medium text-slate-500">Credit (\u20B9)</th>
+                <th className="px-4 py-3 text-right font-medium text-slate-500">Debit (₹)</th>
+                <th className="px-4 py-3 text-right font-medium text-slate-500">Credit (₹)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -114,12 +113,12 @@ export function ProfitLossPage() {
                 {income.map((item) => (
                   <tr key={item.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <td className="px-4 py-3">{item.name}</td>
-                    <td className="px-4 py-3 text-right font-mono">\u20B9 {item.amount.toLocaleString('en-IN')}</td>
+                    <td className="px-4 py-3 text-right font-mono">₹ {item.amount.toLocaleString('en-IN')}</td>
                   </tr>
                 ))}
                 <tr className="bg-success-50 dark:bg-success-900/20 font-medium">
                   <td className="px-4 py-3">Total Income</td>
-                  <td className="px-4 py-3 text-right font-mono text-success-700 dark:text-success-400">\u20B9 {totalIncome.toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3 text-right font-mono text-success-700 dark:text-success-400">₹ {totalIncome.toLocaleString('en-IN')}</td>
                 </tr>
               </tbody>
             </table>
@@ -137,12 +136,12 @@ export function ProfitLossPage() {
                 {expenses.map((item) => (
                   <tr key={item.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <td className="px-4 py-3">{item.name}</td>
-                    <td className="px-4 py-3 text-right font-mono">\u20B9 {item.amount.toLocaleString('en-IN')}</td>
+                    <td className="px-4 py-3 text-right font-mono">₹ {item.amount.toLocaleString('en-IN')}</td>
                   </tr>
                 ))}
                 <tr className="bg-error-50 dark:bg-error-900/20 font-medium">
                   <td className="px-4 py-3">Total Expenses</td>
-                  <td className="px-4 py-3 text-right font-mono text-error-700 dark:text-error-400">\u20B9 {totalExpenses.toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3 text-right font-mono text-error-700 dark:text-error-400">₹ {totalExpenses.toLocaleString('en-IN')}</td>
                 </tr>
               </tbody>
             </table>
@@ -156,7 +155,7 @@ export function ProfitLossPage() {
             <div>
               <p className="text-sm text-slate-500">Net {netProfit >= 0 ? 'Profit' : 'Loss'}</p>
               <p className={`text-3xl font-bold ${netProfit >= 0 ? 'text-success-600' : 'text-error-600'}`}>
-                \u20B9 {Math.abs(netProfit).toLocaleString('en-IN')}
+                ₹ {Math.abs(netProfit).toLocaleString('en-IN')}
               </p>
             </div>
             <div className={`p-4 rounded-full ${netProfit >= 0 ? 'bg-success-100 dark:bg-success-900/30' : 'bg-error-100 dark:bg-error-900/30'}`}>
@@ -229,7 +228,7 @@ export function BalanceSheetPage() {
                     {group.items.map((item) => (
                       <tr key={item.name}>
                         <td className="py-2 pl-4">{item.name}</td>
-                        <td className="py-2 text-right font-mono">\u20B9 {item.amount.toLocaleString('en-IN')}</td>
+                        <td className="py-2 text-right font-mono">₹ {item.amount.toLocaleString('en-IN')}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -239,7 +238,7 @@ export function BalanceSheetPage() {
             <hr className="my-4 border-slate-200 dark:border-slate-700" />
             <div className="flex justify-between font-bold">
               <span>Total Assets</span>
-              <span className="text-primary-600">\u20B9 {totalAssets.toLocaleString('en-IN')}</span>
+              <span className="text-primary-600">₹ {totalAssets.toLocaleString('en-IN')}</span>
             </div>
           </CardContent>
         </Card>
@@ -258,7 +257,7 @@ export function BalanceSheetPage() {
                     {group.items.map((item) => (
                       <tr key={item.name}>
                         <td className="py-2 pl-4">{item.name}</td>
-                        <td className="py-2 text-right font-mono">\u20B9 {item.amount.toLocaleString('en-IN')}</td>
+                        <td className="py-2 text-right font-mono">₹ {item.amount.toLocaleString('en-IN')}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -268,7 +267,7 @@ export function BalanceSheetPage() {
             <hr className="my-4 border-slate-200 dark:border-slate-700" />
             <div className="flex justify-between font-bold">
               <span>Total Liabilities</span>
-              <span className="text-primary-600">\u20B9 {totalLiabilities.toLocaleString('en-IN')}</span>
+              <span className="text-primary-600">₹ {totalLiabilities.toLocaleString('en-IN')}</span>
             </div>
           </CardContent>
         </Card>

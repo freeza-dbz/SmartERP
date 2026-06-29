@@ -1,4 +1,4 @@
-import React from 'react';
+
 import {
   TrendingUp,
   TrendingDown,
@@ -8,9 +8,6 @@ import {
   Truck,
   Package,
   Receipt,
-  ArrowRight,
-  Plus,
-  FileText,
   Building2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, StatCard, Button } from '../components/ui';
@@ -21,7 +18,7 @@ const stats = [
   {
     title: "Today's Sales",
     value: 245670,
-    prefix: '\u20B9',
+    prefix: '₹',
     icon: <DollarSign className="w-6 h-6" />,
     trend: { value: 12.5, isPositive: true },
     page: 'sales',
@@ -29,7 +26,7 @@ const stats = [
   {
     title: "Today's Purchases",
     value: 156340,
-    prefix: '\u20B9',
+    prefix: '₹',
     icon: <ShoppingBag className="w-6 h-6" />,
     trend: { value: 3.2, isPositive: false },
     page: 'purchases',
@@ -58,7 +55,7 @@ const stats = [
   {
     title: 'Outstanding Receivables',
     value: 1842560,
-    prefix: '\u20B9',
+    prefix: '₹',
     icon: <Receipt className="w-6 h-6" />,
     trend: { value: 1.8, isPositive: false },
     page: 'outstanding',
@@ -66,7 +63,7 @@ const stats = [
   {
     title: 'Outstanding Payables',
     value: 892340,
-    prefix: '\u20B9',
+    prefix: '₹',
     icon: <Building2 className="w-6 h-6" />,
     trend: { value: 4.2, isPositive: false },
     page: 'outstanding',
@@ -163,7 +160,7 @@ export function DashboardPage() {
             <div className="h-48 flex items-center justify-center text-slate-400">
               <div className="text-center">
                 <TrendingUp className="w-12 h-12 mx-auto mb-2 text-success-500" />
-                <p className="text-2xl font-bold text-slate-900 dark:text-white">\u20B9 45.2L</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">₹ 45.2L</p>
                 <p className="text-sm">This Month</p>
                 <div className="flex justify-center gap-2 mt-4">
                   <div className="text-center">
@@ -194,7 +191,7 @@ export function DashboardPage() {
             <div className="h-48 flex items-center justify-center text-slate-400">
               <div className="text-center">
                 <TrendingDown className="w-12 h-12 mx-auto mb-2 text-primary-500" />
-                <p className="text-2xl font-bold text-slate-900 dark:text-white">\u20B9 28.6L</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">₹ 28.6L</p>
                 <p className="text-sm">This Month</p>
                 <div className="flex justify-center gap-2 mt-4">
                   <div className="text-center">
@@ -266,7 +263,7 @@ export function DashboardPage() {
                     <td className="px-4 py-3 font-mono text-slate-900 dark:text-slate-100">{sale.id}</td>
                     <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{sale.customer}</td>
                     <td className="px-4 py-3 text-right font-medium text-slate-900 dark:text-white">
-                      \u20B9 {sale.amount.toLocaleString('en-IN')}
+                      ₹ {sale.amount.toLocaleString('en-IN')}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <StatusBadge status={sale.status} />
@@ -321,7 +318,7 @@ export function DashboardPage() {
                     <td className="px-4 py-3 font-mono text-slate-900 dark:text-slate-100">{purchase.id}</td>
                     <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{purchase.supplier}</td>
                     <td className="px-4 py-3 text-right font-medium text-slate-900 dark:text-white">
-                      \u20B9 {purchase.amount.toLocaleString('en-IN')}
+                      ₹ {purchase.amount.toLocaleString('en-IN')}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <StatusBadge status={purchase.status} />

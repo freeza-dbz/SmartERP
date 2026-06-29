@@ -52,7 +52,7 @@ export function GSTPage() {
               </div>
               <div>
                 <p className="text-sm text-slate-500">GST Input Credit</p>
-                <p className="font-semibold text-slate-900 dark:text-white">\u20B9 78,000</p>
+                <p className="font-semibold text-slate-900 dark:text-white">₹ 78,000</p>
               </div>
             </div>
           </CardContent>
@@ -70,8 +70,8 @@ export function GSTPage() {
                 <tr>
                   <th className="px-4 py-3 text-left font-medium text-slate-500">Section</th>
                   <th className="px-4 py-3 text-right font-medium text-slate-500">Records</th>
-                  <th className="px-4 py-3 text-right font-medium text-slate-500">Value (\u20B9)</th>
-                  <th className="px-4 py-3 text-right font-medium text-slate-500">Tax (\u20B9)</th>
+                  <th className="px-4 py-3 text-right font-medium text-slate-500">Value (₹)</th>
+                  <th className="px-4 py-3 text-right font-medium text-slate-500">Tax (₹)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
