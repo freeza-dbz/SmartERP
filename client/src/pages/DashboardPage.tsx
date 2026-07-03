@@ -1,5 +1,5 @@
 
-import {
+import React, { useEffect, useState } from 'react';import {
   TrendingUp,
   TrendingDown,
   DollarSign,
@@ -11,64 +11,9 @@ import {
   Building2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, StatCard, Button } from '../components/ui';
-import { StatusBadge } from '../components/ui/Badge';
 import { useApp } from '../context/AppContext';
-
-const stats = [
-  {
-    title: "Today's Sales",
-    value: 245670,
-    prefix: '₹',
-    icon: <DollarSign className="w-6 h-6" />,
-    trend: { value: 12.5, isPositive: true },
-    page: 'sales',
-  },
-  {
-    title: "Today's Purchases",
-    value: 156340,
-    prefix: '₹',
-    icon: <ShoppingBag className="w-6 h-6" />,
-    trend: { value: 3.2, isPositive: false },
-    page: 'purchases',
-  },
-  {
-    title: 'Customers',
-    value: 1248,
-    icon: <Users className="w-6 h-6" />,
-    trend: { value: 8.1, isPositive: true },
-    page: 'customers',
-  },
-  {
-    title: 'Suppliers',
-    value: 342,
-    icon: <Truck className="w-6 h-6" />,
-    trend: { value: 2.5, isPositive: true },
-    page: 'suppliers',
-  },
-  {
-    title: 'Stock Items',
-    value: 892,
-    icon: <Package className="w-6 h-6" />,
-    trend: { value: 5.3, isPositive: true },
-    page: 'stock-items',
-  },
-  {
-    title: 'Outstanding Receivables',
-    value: 1842560,
-    prefix: '₹',
-    icon: <Receipt className="w-6 h-6" />,
-    trend: { value: 1.8, isPositive: false },
-    page: 'outstanding',
-  },
-  {
-    title: 'Outstanding Payables',
-    value: 892340,
-    prefix: '₹',
-    icon: <Building2 className="w-6 h-6" />,
-    trend: { value: 4.2, isPositive: false },
-    page: 'outstanding',
-  },
-];
+import { StatusBadge } from '../components/ui/Badge';
+import { api } from '../lib/api';
 
 const quickActions = [
   { label: 'New Customer', icon: <Users className="w-4 h-4" />, shortcut: 'Ctrl+C', page: 'customers' },
@@ -100,6 +45,40 @@ const recentCustomers = [
 
 export function DashboardPage() {
   const { setCurrentPage, addToast, selectedCompany } = useApp();
+  const [stats, setStats] = useState([
+    { title: "Today's Sales", value: 0, prefix: '₹', icon: <DollarSign className="w-6 h-6" />, page: 'sales' },
+    { title: "Today's Purchases", value: 0, prefix: '₹', icon: <ShoppingBag className="w-6 h-6" />, page: 'purchases' },
+    { title: 'Customers', value: 0, icon: <Users className="w-6 h-6" />, page: 'customers' },
+    { title: 'Suppliers', value: 0, icon: <Truck className="w-6 h-6" />, page: 'suppliers' },
+    { title: 'Stock Items', value: 0, icon: <Package className="w-6 h-6" />, page: 'stock-items' },
+    { title: 'Outstanding Receivables', value: 0, prefix: '₹', icon: <Receipt className="w-6 h-6" />, page: 'outstanding' },
+    { title: 'Outstanding Payables', value: 0, prefix: '₹', icon: <Building2 className="w-6 h-6" />, page: 'outstanding' },
+  ]);
+
+  useEffect(() => {
+    if (selectedCompany) {
+      const fetchSummary = async () => {
+        try {
+          const response = await api.get(`/dashboard/summary?companyId=${selectedCompany.id}`);
+          const summary = response.data.data;
+          setStats([
+            { title: "Today's Sales", value: summary.todaysSales, prefix: '₹', icon: <DollarSign className="w-6 h-6" />, page: 'sales' },
+            { title: "Today's Purchases", value: summary.todaysPurchases, prefix: '₹', icon: <ShoppingBag className="w-6 h-6" />, page: 'purchases' },
+            { title: 'Customers', value: summary.customers, icon: <Users className="w-6 h-6" />, page: 'customers' },
+            { title: 'Suppliers', value: summary.suppliers, icon: <Truck className="w-6 h-6" />, page: 'suppliers' },
+            { title: 'Stock Items', value: summary.stockItems, icon: <Package className="w-6 h-6" />, page: 'stock-items' },
+            { title: 'Outstanding Receivables', value: summary.outstandingReceivables, prefix: '₹', icon: <Receipt className="w-6 h-6" />, page: 'outstanding' },
+            { title: 'Outstanding Payables', value: summary.outstandingPayables, prefix: '₹', icon: <Building2 className="w-6 h-6" />, page: 'outstanding' },
+          ]);
+        } catch (error) {
+          addToast({ type: 'error', title: 'Failed to load dashboard data' });
+          console.error(error);
+        }
+      };
+      fetchSummary();
+    }
+  }, [selectedCompany, addToast]);
+
 
   const handleQuickAction = (page: string) => {
     setCurrentPage(page);
@@ -133,7 +112,6 @@ export function DashboardPage() {
             value={stat.value}
             prefix={stat.prefix}
             icon={stat.icon}
-            trend={stat.trend}
             onClick={() => setCurrentPage(stat.page)}
           />
         ))}
@@ -147,7 +125,6 @@ export function DashboardPage() {
             value={stat.value}
             prefix={stat.prefix}
             icon={stat.icon}
-            trend={stat.trend}
             onClick={() => setCurrentPage(stat.page)}
           />
         ))}
