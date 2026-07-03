@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { ToastContainer } from './components/ui/Toast';

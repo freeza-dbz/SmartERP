@@ -45,54 +45,62 @@ model Ledger {
   isSystem                   Boolean           @default(false)
   companyId                  Int
   company                    Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  purchaseVouchersAsSupplier PurchaseVoucher[] @relation("SupplierPurchases")
-  salesVouchersAsCustomer    SalesVoucher[]    @relation("CustomerSales")
-}
-
-model PurchaseItem {
-  id                Int             @id @default(autoincrement())
-  purchaseVoucherId Int
-  itemId            Int
-  quantity          Decimal?        @db.Decimal(12, 2)
-  rate              Decimal?        @db.Decimal(12, 2)
-  amount            Decimal?        @db.Decimal(12, 2)
-  stockItem         StockItem       @relation(fields: [itemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  purchaseVoucher   PurchaseVoucher @relation(fields: [purchaseVoucherId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  purchaseVouchers           PurchaseVoucher[]
+  salesVouchers              SalesVoucher[]
 }
 
 model PurchaseVoucher {
-  id            Int            @id @default(autoincrement())
-  companyId     Int
-  supplierId    Int
-  voucherNo     String?        @db.VarChar(50)
-  voucherDate   DateTime?      @db.Date
-  totalAmount   Decimal?       @db.Decimal(12, 2)
-  purchaseItems PurchaseItem[]
-  company       Company        @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  supplier      Ledger         @relation("SupplierPurchases", fields: [supplierId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id          Int                   @id @default(autoincrement())
+  voucherNo   String                @db.VarChar(50)
+  date        DateTime              @db.Date
+  totalAmount Decimal               @db.Decimal(12, 2)
+  companyId   Int
+  supplierId  Int
+  items       PurchaseVoucherItem[]
+  company     Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  supplier    Ledger                @relation(fields: [supplierId], references: [id], onDelete: NoAction)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
 }
 
-model SalesItem {
-  id             Int          @id @default(autoincrement())
-  salesVoucherId Int
-  itemId         Int
-  quantity       Decimal?     @db.Decimal(12, 2)
-  rate           Decimal?     @db.Decimal(12, 2)
-  amount         Decimal?     @db.Decimal(12, 2)
-  stockItem      StockItem    @relation(fields: [itemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  salesVoucher   SalesVoucher @relation(fields: [salesVoucherId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model PurchaseVoucherItem {
+  id        Int             @id @default(autoincrement())
+  quantity  Decimal         @db.Decimal(12, 2)
+  rate      Decimal         @db.Decimal(12, 2)
+  amount    Decimal?        @db.Decimal(12, 2)
+  voucherId Int
+  itemId    Int
+  voucher   PurchaseVoucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  item      StockItem       @relation(fields: [itemId], references: [id], onDelete: NoAction)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 }
 
 model SalesVoucher {
-  id          Int         @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
+  invoiceNo   String             @db.VarChar(50)
+  invoiceDate DateTime           @db.Date
+  totalAmount Decimal            @db.Decimal(12, 2)
   companyId   Int
   customerId  Int
-  invoiceNo   String?     @db.VarChar(50)
-  invoiceDate DateTime?   @db.Date
-  totalAmount Decimal?    @db.Decimal(12, 2)
-  salesItems  SalesItem[]
-  company     Company     @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer    Ledger      @relation("CustomerSales", fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  items       SalesVoucherItem[]
+  company     Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer    Ledger             @relation(fields: [customerId], references: [id], onDelete: NoAction)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+model SalesVoucherItem {
+  id        Int          @id @default(autoincrement())
+  quantity  Decimal      @db.Decimal(12, 2)
+  rate      Decimal      @db.Decimal(12, 2)
+  amount    Decimal?     @db.Decimal(12, 2)
+  voucherId Int
+  itemId    Int
+  voucher   SalesVoucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  item      StockItem    @relation(fields: [itemId], references: [id], onDelete: NoAction)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 }
 
 model StockGroup {
@@ -120,8 +128,8 @@ model StockItem {
   unit          Unit           @relation(fields: [unitId], references: [id])
   groupId       Int
   stockGroup    StockGroup     @relation(fields: [groupId], references: [id])
-  purchaseItems PurchaseItem[]
-  salesItems    SalesItem[]
+  purchaseVoucherItems PurchaseVoucherItem[]
+  salesVoucherItems    SalesVoucherItem[]
   company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 

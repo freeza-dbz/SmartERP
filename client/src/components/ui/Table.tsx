@@ -49,8 +49,8 @@ export function Table<T extends Record<string, unknown>>({
 
   const sortedData = sortConfig
     ? [...filteredData].sort((a, b) => {
-        const aVal = a[sortConfig.key];
-        const bVal = b[sortConfig.key];
+        const aVal = a[sortConfig.key] as any;
+        const bVal = b[sortConfig.key] as any;
         if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
@@ -122,7 +122,7 @@ export function Table<T extends Record<string, unknown>>({
               {loading ? (
                 Array.from({ length: pageSize }).map((_, i) => (
                   <tr key={i}>
-                    {columns.map((col, j) => (
+                    {columns.map((_, j) => (
                       <td key={j} className="px-4 py-3">
                         <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
                       </td>

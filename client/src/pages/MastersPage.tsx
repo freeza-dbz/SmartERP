@@ -102,8 +102,8 @@ export function CustomersPage() {
     setShowModal(true);
   };
 
-  const handleDelete = (_id: string) => {
-    addToast({ type: 'success', title: 'Customer deleted' });
+  const handleDelete = (id: string) => {
+    addToast({ type: 'success', title: 'Customer deleted', message: `Customer ID: ${id}` });
   };
 
   return (
@@ -291,8 +291,8 @@ export function SuppliersPage() {
     setShowModal(true);
   };
 
-  const handleDelete = (_id: string) => {
-    addToast({ type: 'success', title: 'Supplier deleted' });
+  const handleDelete = (id: string) => {
+    addToast({ type: 'success', title: 'Supplier deleted', message: `Supplier ID: ${id}` });
   };
 
   const columns: any[] = [

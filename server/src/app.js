@@ -26,6 +26,9 @@ import ledgerRoutes from "./routes/ledger.routes.js"
 import stockGroupRoutes from "./routes/stockGroup.routes.js"
 import unitRoutes from "./routes/unit.routes.js"
 import stockItemRoutes from "./routes/stockItem.routes.js"
+import salesVoucherRoutes from "./routes/salesVoucher.routes.js"
+import purchaseVoucherRoutes from "./routes/purchaseVoucher.routes.js"
+import dashboardRoutes from "./routes/dashboard.routes.js"
 
 //Routes declaration
 app.use("/api/v1/users", userRoutes);
@@ -34,6 +37,9 @@ app.use("/api/v1/ledgers", ledgerRoutes);
 app.use("/api/v1/stock-groups", stockGroupRoutes);
 app.use("/api/v1/units", unitRoutes);
 app.use("/api/v1/items", stockItemRoutes);
+app.use("/api/v1/sales-vouchers", salesVoucherRoutes);
+app.use("/api/v1/purchase-vouchers", purchaseVoucherRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 
 
 export { app };

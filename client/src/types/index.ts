@@ -113,5 +113,5 @@ export interface ToastMessage {
 }
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 export type InputSize = 'sm' | 'md' | 'lg';

@@ -1,7 +1,5 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, Button } from '../components/ui';
-import { useApp } from '../context/AppContext';
-import { FileText, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 
 export function GSTPage() {
   return (

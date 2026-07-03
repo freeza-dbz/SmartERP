@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';import {
+import { useEffect, useState } from 'react';import {
   TrendingUp,
   TrendingDown,
   DollarSign,

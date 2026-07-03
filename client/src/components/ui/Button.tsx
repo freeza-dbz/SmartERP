@@ -23,6 +23,7 @@ const sizeClasses: Record<ButtonSize, string> = {
   sm: 'px-3 py-1.5 text-sm',
   md: 'px-4 py-2 text-sm',
   lg: 'px-6 py-3 text-base',
+  icon: 'p-2 text-sm',
 };
 
 export function Button({
@@ -74,6 +75,7 @@ export function IconButton({
     sm: 'p-1.5',
     md: 'p-2',
     lg: 'p-3',
+    icon: 'p-2',
   };
 
   return (

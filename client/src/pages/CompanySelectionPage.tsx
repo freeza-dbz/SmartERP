@@ -66,7 +66,7 @@ export function CompanySelectionPage() {
     setShowMenu(null);
   };
 
-  const handleDeleteCompany = (companyId: string) => {
+  const handleDeleteCompany = () => {
     addToast({ type: 'success', title: 'Company Deleted' });
     setConfirmDelete(null);
     setShowMenu(null);
@@ -197,7 +197,7 @@ export function CompanySelectionPage() {
           setEditingCompany(null);
         }}
         company={editingCompany}
-        onSave={(data) => {
+        onSave={() => {
           addToast({
             type: 'success',
             title: editingCompany ? 'Company Updated' : 'Company Created',
@@ -220,7 +220,7 @@ export function CompanySelectionPage() {
           <Button variant="secondary" onClick={() => setConfirmDelete(null)}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={() => confirmDelete && handleDeleteCompany(confirmDelete)}>
+          <Button variant="danger" onClick={() => confirmDelete && handleDeleteCompany()}>
             Delete
           </Button>
         </div>

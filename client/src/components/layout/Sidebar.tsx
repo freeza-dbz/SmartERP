@@ -10,7 +10,6 @@ import {
   ClipboardList,
   Settings,
   ChevronDown,
-  ChevronRight,
   Menu,
   Keyboard,
 } from 'lucide-react';
@@ -19,7 +18,7 @@ import { useApp } from '../../context/AppContext';
 interface NavItem {
   id: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string }>;
   shortcut?: string;
   children?: NavItem[];
 }
