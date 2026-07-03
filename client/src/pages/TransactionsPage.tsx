@@ -86,7 +86,10 @@ export function SalesPage() {
                 <button className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700" title="Edit">
                   <Edit2 className="w-4 h-4 text-slate-400" />
                 </button>
-                <button className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700" title="Print">
+                <button
+                  onClick={() => window.open(`/api/v1/sales-vouchers/${item.id}/pdf`, '_blank')}
+                  className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700" title="Print"
+                >
                   <Printer className="w-4 h-4 text-slate-400" />
                 </button>
               </div>
