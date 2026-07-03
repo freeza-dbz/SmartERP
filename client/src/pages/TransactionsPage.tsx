@@ -78,7 +78,7 @@ export function SalesPage() {
             loading={loading}
             searchPlaceholder="Search by voucher no, customer..."
             onRowClick={(item) => addToast({ type: 'info', title: 'Opening', message: item.voucherNo })}
-            actions={() => (
+            actions={(item: any) => (
               <div className="flex items-center gap-1">
                 <button className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700" title="View">
                   <Eye className="w-4 h-4 text-slate-400" />
@@ -87,7 +87,10 @@ export function SalesPage() {
                   <Edit2 className="w-4 h-4 text-slate-400" />
                 </button>
                 <button
-                  onClick={() => window.open(`/api/v1/sales-vouchers/${item.id}/pdf`, '_blank')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`/api/v1/sales-vouchers/${item.id}/pdf`, '_blank');
+                  }}
                   className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700" title="Print"
                 >
                   <Printer className="w-4 h-4 text-slate-400" />
