@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: smarterp-backend
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npx prisma generate
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: CORS_ORIGIN
+        value: https://smart-erp-liard.vercel.app
+      - key: ACCESS_TOKEN_SECRET
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRY
+        value: 1d
+      - key: DATABASE_URL
+        sync: false
