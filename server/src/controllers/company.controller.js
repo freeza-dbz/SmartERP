@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiErrors.js";
@@ -36,12 +37,12 @@ const getCompaniesHandler = asyncHandler(async (req, res) => {
 
 const updateCompanyHandler = asyncHandler(async (req, res) => {
     const userId = req.user?.id;
-    const companyId = parseInt(req.params.id, 10);
+    const companyId = req.params.id;
 
     if (!userId) {
         throw new ApiError(401, "Unauthorized request");
     }
-    if (isNaN(companyId)) {
+    if (!mongoose.Types.ObjectId.isValid(companyId)) {
         throw new ApiError(400, "Invalid company ID");
     }
 
@@ -54,12 +55,12 @@ const updateCompanyHandler = asyncHandler(async (req, res) => {
 
 const deleteCompanyHandler = asyncHandler(async (req, res) => {
     const userId = req.user?.id;
-    const companyId = parseInt(req.params.id, 10);
+    const companyId = req.params.id;
 
     if (!userId) {
         throw new ApiError(401, "Unauthorized request");
     }
-    if (isNaN(companyId)) {
+    if (!mongoose.Types.ObjectId.isValid(companyId)) {
         throw new ApiError(400, "Invalid company ID");
     }
 
