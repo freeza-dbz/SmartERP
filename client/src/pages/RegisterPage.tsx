@@ -61,7 +61,10 @@ export function RegisterPage() {
       addToast({ type: 'success', title: 'Account created', message: 'Welcome to SmartERP!' });
       setCurrentPage('company-selection');
     } catch (err: any) {
-      const msg = err.message || 'An error occurred. Please try again.';
+      let msg = err.message || 'An error occurred. Please try again.';
+      if (msg === 'Failed to fetch' || msg.includes('NetworkError') || msg.includes('fetch')) {
+        msg = 'Cannot connect to the server. Please make sure the server is running.';
+      }
       setSubmitError(msg);
       addToast({ type: 'error', title: 'Registration failed', message: msg });
     } finally {
