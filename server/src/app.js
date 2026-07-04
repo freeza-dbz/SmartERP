@@ -30,6 +30,9 @@ import salesVoucherRoutes from "./routes/salesVoucher.routes.js"
 import purchaseVoucherRoutes from "./routes/purchaseVoucher.routes.js"
 import dashboardRoutes from "./routes/dashboard.routes.js"
 
+// Health check
+app.get("/health", (req, res) => res.json({ status: "ok" }));
+
 //Routes declaration
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/company", companyRoutes);

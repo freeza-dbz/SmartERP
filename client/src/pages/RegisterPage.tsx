@@ -13,11 +13,14 @@ export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState('');
 
 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+    setSubmitError('');
     const newErrors: Record<string, string> = {};
 
     if (!name.trim()) newErrors.name = 'Name is required';
@@ -58,7 +61,9 @@ export function RegisterPage() {
       addToast({ type: 'success', title: 'Account created', message: 'Welcome to SmartERP!' });
       setCurrentPage('company-selection');
     } catch (err: any) {
-      addToast({ type: 'error', title: 'Registration failed', message: err.message || 'An error occurred.' });
+      const msg = err.message || 'An error occurred. Please try again.';
+      setSubmitError(msg);
+      addToast({ type: 'error', title: 'Registration failed', message: msg });
     } finally {
       setLoading(false);
     }
@@ -84,6 +89,11 @@ export function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {submitError && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+                {submitError}
+              </div>
+            )}
             <Input
               label="Full Name"
               placeholder="John Doe"
