@@ -28,7 +28,7 @@ const login = asyncHandler(async (req, res) => {
 
     const token = generateAccessToken(user);
 
-    const loggedInUser = { id: user.id, name: user.fullName, email: user.email, username: user.username };
+    const loggedInUser = { id: user._id, name: user.fullName, email: user.email, username: user.username };
 
     return res
         .status(200)

@@ -53,7 +53,7 @@ export function RegisterPage() {
       localStorage.setItem('token', token);
 
       setUser({
-        id: loggedInUser.id.toString(),
+        id: (loggedInUser.id || loggedInUser._id || '').toString(),
         name: loggedInUser.name,
         email: loggedInUser.email,
       });
