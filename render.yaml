@@ -4,11 +4,11 @@ services:
     env: node
     plan: free
     rootDir: server
-    buildCommand: npm install && npx prisma generate
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy
     startCommand: npm start
     envVars:
       - key: PORT
-        value: 8000
+        value: 10000
       - key: CORS_ORIGIN
         value: https://smart-erp-liard.vercel.app
       - key: ACCESS_TOKEN_SECRET
@@ -16,4 +16,12 @@ services:
       - key: ACCESS_TOKEN_EXPIRY
         value: 1d
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: smarterp-db
+          property: connectionString
+
+databases:
+  - name: smarterp-db
+    plan: free
+    databaseName: smarterp
+    user: smarterp_user
