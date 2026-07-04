@@ -14,7 +14,7 @@ import { useApp } from '../../context/AppContext';
 import { Input } from '../ui/Input';
 
 export function Navbar() {
-  const { darkMode, toggleDarkMode, user, selectedCompany, setCurrentPage } = useApp();
+  const { darkMode, toggleDarkMode, user, selectedCompany, setCurrentPage, setUser, setSelectedCompany } = useApp();
   const [showCompanyDropdown, setShowCompanyDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -160,7 +160,12 @@ export function Navbar() {
                   <hr className="my-2 border-slate-200 dark:border-slate-700" />
                   <button
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-error-600 dark:text-error-400"
-                    onClick={() => setCurrentPage('login')}
+                    onClick={() => {
+                      setUser(null);
+                      setSelectedCompany(null);
+                      localStorage.removeItem('token');
+                      setCurrentPage('login');
+                    }}
                   >
                     <LogOut className="w-4 h-4" />
                     Sign Out

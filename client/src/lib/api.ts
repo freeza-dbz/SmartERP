@@ -1,7 +1,7 @@
 const BASE_URL = '/api/v1';
 
 async function request(path: string, options: RequestInit = {}) {
-  const token = 'mock-token'; // Consistent with the token used in MastersPage.tsx
+  const token = localStorage.getItem('token') || 'mock-token'; // Consistent with the token used in MastersPage.tsx
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`,

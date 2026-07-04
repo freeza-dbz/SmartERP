@@ -5,9 +5,9 @@ const MAX_COMPANIES_PER_USER = 5;
 
 
 const createCompany = async (companyData, userId) => {
-    const companyCount = await prisma.companies.count({
+    const companyCount = await prisma.company.count({
         where: {
-            user_id: userId,
+            userId: userId,
         },
     });
 
@@ -15,37 +15,56 @@ const createCompany = async (companyData, userId) => {
         throw new ApiError(403, `A user can create a maximum of ${MAX_COMPANIES_PER_USER} companies.`);
     }
 
-    const { company_name, address, gst_number, state, financial_year } = companyData;
+    const { name, address, gstNumber, state, financialYear } = companyData;
 
-    const company = await prisma.companies.create({
-        data: {
-            company_name,
-            address,
-            gst_number,
-            state,
-            financial_year,
-            user_id: userId,
-        },
+    return await prisma.$transaction(async (tx) => {
+        const company = await tx.company.create({
+            data: {
+                name,
+                address,
+                gstNumber,
+                state,
+                financialYear,
+                userId: userId,
+            },
+        });
+
+        // Auto-seed default Unit
+        await tx.unit.create({
+            data: {
+                name: "Pieces",
+                shortName: "PCS",
+                companyId: company.id,
+            },
+        });
+
+        // Auto-seed default Stock Group
+        await tx.stockGroup.create({
+            data: {
+                name: "Primary",
+                companyId: company.id,
+            },
+        });
+
+        return company;
     });
-
-    return company;
 };
 
 
 const getCompaniesByUserId = async (userId) => {
-    return prisma.companies.findMany({
+    return prisma.company.findMany({
         where: {
-            user_id: userId,
+            userId: userId,
         },
     });
 };
 
 
 const updateCompany = async (companyId, updateData, userId) => {
-    const company = await prisma.companies.findFirst({
+    const company = await prisma.company.findFirst({
         where: {
             id: companyId,
-            user_id: userId,
+            userId: userId,
         },
     });
 
@@ -53,33 +72,33 @@ const updateCompany = async (companyId, updateData, userId) => {
         throw new ApiError(404, "Company not found or user not authorized.");
     }
 
-    const { company_name, address, gst_number, state, financial_year } = updateData;
+    const { name, address, gstNumber, state, financialYear } = updateData;
 
-    return prisma.companies.update({
+    return prisma.company.update({
         where: {
             id: companyId,
         },
         data: {
-            company_name,
+            name,
             address,
-            gst_number,
+            gstNumber,
             state,
-            financial_year,
+            financialYear,
         },
     });
 };
 
 
 const deleteCompany = async (companyId, userId) => {
-    const company = await prisma.companies.findFirst({
-        where: { id: companyId, user_id: userId },
+    const company = await prisma.company.findFirst({
+        where: { id: companyId, userId: userId },
     });
 
     if (!company) {
         throw new ApiError(404, "Company not found or user not authorized.");
     }
 
-    return prisma.companies.delete({
+    return prisma.company.delete({
         where: { id: companyId },
     });
 };

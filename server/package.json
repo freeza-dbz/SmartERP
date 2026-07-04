@@ -26,6 +26,7 @@
     "fs": "^0.0.1-security",
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.3",
-    "node": "^24.18.0"
+    "node": "^24.18.0",
+    "pdf-lib": "^1.17.1"
   }
 }

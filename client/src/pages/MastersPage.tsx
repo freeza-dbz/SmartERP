@@ -47,7 +47,7 @@ interface StockItem {
 export function CustomersPage() {
   const { addToast, selectedCompany } = useApp();
   const companyId = selectedCompany ? parseInt(selectedCompany.id) : 1;
-  const token = 'mock-token';
+  const token = localStorage.getItem('token') || 'mock-token';
   const [customers, setCustomers] = useState<Ledger[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Ledger | null>(null);
@@ -243,7 +243,7 @@ function CustomerModal({ open, onClose, customer, onSave }: CustomerModalProps) 
 export function SuppliersPage() {
   const { addToast, selectedCompany } = useApp();
   const companyId = selectedCompany ? parseInt(selectedCompany.id) : 1;
-  const token = 'mock-token';
+  const token = localStorage.getItem('token') || 'mock-token';
   const [suppliers, setSuppliers] = useState<Ledger[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Ledger | null>(null);
@@ -441,7 +441,7 @@ function SupplierModal({ open, onClose, supplier, onSave }: SupplierModalProps) 
 export function StockItemsPage() {
   const { addToast, selectedCompany } = useApp();
   const companyId = selectedCompany ? parseInt(selectedCompany.id) : 1;
-  const token = 'mock-token';
+  const token = localStorage.getItem('token') || 'mock-token';
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [stockGroups, setStockGroups] = useState<StockGroup[]>([]);

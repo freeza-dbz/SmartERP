@@ -3,8 +3,11 @@ import {
   createStockGroup,
   getStockGroups,
 } from "../controllers/stockGroup.controller.js"
+import verifyJWT from "../middleware/auth.middleware.js"
 
 const router = Router();
+
+router.use(verifyJWT);
 
 router.post('/groups', createStockGroup);
 router.get('/groups', getStockGroups);

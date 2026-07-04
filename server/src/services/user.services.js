@@ -5,7 +5,7 @@ import { ApiError } from "../utils/ApiErrors.js"
 const prisma = new PrismaClient()
 
 const registerUser = async ({ fullName, username, email, password }) => {
-    const existingUser = await prisma.users.findUnique({
+    const existingUser = await prisma.user.findUnique({
         where: {
             email,
         }
@@ -17,7 +17,7 @@ const registerUser = async ({ fullName, username, email, password }) => {
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    const user = await prisma.users.create({
+    const user = await prisma.user.create({
         data: {
             fullName,
             email,
@@ -30,7 +30,7 @@ const registerUser = async ({ fullName, username, email, password }) => {
 }
 
 const loginUser = async ({ email, password }) => {
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
         where: {
             email,
         },

@@ -1,41 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Building2, Plus, Edit2, Trash2, MapPin, Calendar, FileText, MoreVertical } from 'lucide-react';
 import { Card, CardContent, Button, Modal, Input, Select } from '../components/ui';
 import { useApp } from '../context/AppContext';
+import { api } from '../lib/api';
 import type { Company } from '../types';
 
-const mockCompanies: Company[] = [
-  {
-    id: '1',
-    name: 'ABC Electronics Pvt Ltd',
-    address: '123 Industrial Area, Sector 15',
-    state: 'Maharashtra',
-    gstNumber: '27AABCT1234M1Z5',
-    financialYear: '2024-2025',
-    contactNumber: '+91 98765 43210',
-    email: 'accounts@abcelectronics.com',
-  },
-  {
-    id: '2',
-    name: 'XYZ Textiles Ltd',
-    address: '45 Trade Center, MG Road',
-    state: 'Gujarat',
-    gstNumber: '24AABCX5678L1Z2',
-    financialYear: '2024-2025',
-    contactNumber: '+91 87654 32109',
-    email: 'finance@xyztextiles.com',
-  },
-  {
-    id: '3',
-    name: 'Global Imports Exports',
-    address: '78 Cargo Complex, Dock Road',
-    state: 'Tamil Nadu',
-    gstNumber: '33AABCG9012N1Z8',
-    financialYear: '2024-2025',
-    contactNumber: '+91 76543 21098',
-    email: 'accounts@globalimports.com',
-  },
-];
+
 
 const indianStates = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -48,11 +18,24 @@ const indianStates = [
 
 export function CompanySelectionPage() {
   const { setSelectedCompany, setCurrentPage, addToast } = useApp();
-  const [companies] = useState<Company[]>(mockCompanies);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [showMenu, setShowMenu] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const fetchCompanies = useCallback(async () => {
+    try {
+      const response = await api.get('/company/profile');
+      setCompanies(response.data.data || []);
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Error fetching companies', message: err.message });
+    }
+  }, [addToast]);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, [fetchCompanies]);
 
   const handleSelectCompany = (company: Company) => {
     setSelectedCompany(company);
@@ -66,10 +49,18 @@ export function CompanySelectionPage() {
     setShowMenu(null);
   };
 
-  const handleDeleteCompany = () => {
-    addToast({ type: 'success', title: 'Company Deleted' });
-    setConfirmDelete(null);
-    setShowMenu(null);
+  const handleDeleteCompany = async () => {
+    if (!confirmDelete) return;
+    try {
+      await api.delete(`/company/${confirmDelete}/delete`);
+      addToast({ type: 'success', title: 'Company Deleted' });
+      fetchCompanies();
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Error deleting company', message: err.message });
+    } finally {
+      setConfirmDelete(null);
+      setShowMenu(null);
+    }
   };
 
   return (
@@ -197,13 +188,21 @@ export function CompanySelectionPage() {
           setEditingCompany(null);
         }}
         company={editingCompany}
-        onSave={() => {
-          addToast({
-            type: 'success',
-            title: editingCompany ? 'Company Updated' : 'Company Created',
-          });
-          setShowCreateModal(false);
-          setEditingCompany(null);
+        onSave={async (formData) => {
+          try {
+            if (editingCompany) {
+              await api.put(`/company/${editingCompany.id}/update`, formData);
+              addToast({ type: 'success', title: 'Company Updated' });
+            } else {
+              await api.post('/company/register', formData);
+              addToast({ type: 'success', title: 'Company Created' });
+            }
+            fetchCompanies();
+            setShowCreateModal(false);
+            setEditingCompany(null);
+          } catch (err: any) {
+            addToast({ type: 'error', title: 'Error saving company', message: err.message });
+          }
         }}
       />
 
@@ -220,7 +219,7 @@ export function CompanySelectionPage() {
           <Button variant="secondary" onClick={() => setConfirmDelete(null)}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={() => confirmDelete && handleDeleteCompany()}>
+          <Button variant="danger" onClick={handleDeleteCompany}>
             Delete
           </Button>
         </div>

@@ -3,6 +3,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiErrors.js';
 
+const prisma = new PrismaClient();
 
 const createStockGroup = asyncHandler(async (req, res) => {
   const { name, parentId, companyId } = req.body;

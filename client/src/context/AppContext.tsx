@@ -20,8 +20,20 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [user, setUserState] = useState<User | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('user');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
+  });
+  const [selectedCompany, setSelectedCompanyState] = useState<Company | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('selectedCompany');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
+  });
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('darkMode') === 'true' ||
@@ -31,7 +43,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [currentPage, setCurrentPage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('user');
+      const savedCompany = localStorage.getItem('selectedCompany');
+      if (savedUser) {
+        return savedCompany ? 'dashboard' : 'company-selection';
+      }
+    }
+    return 'login';
+  });
+
+  const setUser = useCallback((val: User | null) => {
+    setUserState(val);
+    if (val) {
+      localStorage.setItem('user', JSON.stringify(val));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, []);
+
+  const setSelectedCompany = useCallback((val: Company | null) => {
+    setSelectedCompanyState(val);
+    if (val) {
+      localStorage.setItem('selectedCompany', JSON.stringify(val));
+    } else {
+      localStorage.removeItem('selectedCompany');
+    }
+  }, []);
 
   useEffect(() => {
     if (darkMode) {

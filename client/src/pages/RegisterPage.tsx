@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, ArrowRight, User, Mail, Lock, Check } from 'lucide-react';
 import { Button, Input } from '../components/ui';
 import { useApp } from '../context/AppContext';
+import { api } from '../lib/api';
 
 export function RegisterPage() {
   const { setUser, setCurrentPage, addToast } = useApp();
@@ -51,11 +52,34 @@ export function RegisterPage() {
 
     setLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // 1. Register User
+      await api.post('/users/register', {
+        fullName: name,
+        email,
+        password,
+        username: email.split('@')[0],
+      });
 
-    setUser({ id: '1', name, email });
-    addToast({ type: 'success', title: 'Account created', message: 'Welcome to SmartERP!' });
-    setCurrentPage('company-selection');
+      // 2. Auto Login
+      const loginResponse = await api.post('/users/login', { email, password });
+      const { user: loggedInUser, token } = loginResponse.data.data;
+
+      localStorage.setItem('token', token);
+
+      setUser({
+        id: loggedInUser.id.toString(),
+        name: loggedInUser.name,
+        email: loggedInUser.email,
+      });
+
+      addToast({ type: 'success', title: 'Account created', message: 'Welcome to SmartERP!' });
+      setCurrentPage('company-selection');
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Registration failed', message: err.message || 'An error occurred.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const strength = passwordStrength();
