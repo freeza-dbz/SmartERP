@@ -1,14 +1,14 @@
-import { prisma } from "../db/index.js";
+import mongoose from "mongoose";
+import Company from "../models/company.model.js";
+import Unit from "../models/unit.models.js";
+import StockGroup from "../models/stockGroups.models.js";
 import { ApiError } from "../utils/ApiErrors.js";
 
 const MAX_COMPANIES_PER_USER = 5;
 
-
 const createCompany = async (companyData, userId) => {
-    const companyCount = await prisma.company.count({
-        where: {
-            userId: userId,
-        },
+    const companyCount = await Company.countDocuments({
+        userId: userId,
     });
 
     if (companyCount >= MAX_COMPANIES_PER_USER) {
@@ -17,55 +17,56 @@ const createCompany = async (companyData, userId) => {
 
     const { name, address, gstNumber, state, financialYear } = companyData;
 
-    return await prisma.$transaction(async (tx) => {
-        const company = await tx.company.create({
-            data: {
-                name,
-                address,
-                gstNumber,
-                state,
-                financialYear,
-                userId: userId,
-            },
-        });
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const companyArr = await Company.create([{
+            name,
+            address,
+            gstNumber,
+            state,
+            financialYear,
+            userId: userId,
+        }], { session });
+
+        const company = companyArr[0];
 
         // Auto-seed default Unit
-        await tx.unit.create({
-            data: {
-                name: "Pieces",
-                shortName: "PCS",
-                companyId: company.id,
-            },
-        });
+        await Unit.create([{
+            name: "Pieces",
+            shortName: "PCS",
+            companyId: company._id,
+        }], { session });
 
         // Auto-seed default Stock Group
-        await tx.stockGroup.create({
-            data: {
-                name: "Primary",
-                companyId: company.id,
-            },
-        });
+        await StockGroup.create([{
+            name: "Primary",
+            companyId: company._id,
+        }], { session });
 
+        await session.commitTransaction();
         return company;
-    });
+    } catch (error) {
+        await session.abortTransaction();
+        throw new ApiError(500, error.message || "Failed to create company");
+    } finally {
+        session.endSession();
+    }
 };
 
 
 const getCompaniesByUserId = async (userId) => {
-    return prisma.company.findMany({
-        where: {
-            userId: userId,
-        },
+    return Company.find({
+        userId: userId,
     });
 };
 
 
 const updateCompany = async (companyId, updateData, userId) => {
-    const company = await prisma.company.findFirst({
-        where: {
-            id: companyId,
-            userId: userId,
-        },
+    const company = await Company.findOne({
+        _id: companyId,
+        userId: userId,
     });
 
     if (!company) {
@@ -74,33 +75,31 @@ const updateCompany = async (companyId, updateData, userId) => {
 
     const { name, address, gstNumber, state, financialYear } = updateData;
 
-    return prisma.company.update({
-        where: {
-            id: companyId,
-        },
-        data: {
+    return Company.findByIdAndUpdate(
+        companyId,
+        {
             name,
             address,
             gstNumber,
             state,
             financialYear,
         },
-    });
+        { new: true }
+    );
 };
 
 
 const deleteCompany = async (companyId, userId) => {
-    const company = await prisma.company.findFirst({
-        where: { id: companyId, userId: userId },
+    const company = await Company.findOne({
+        _id: companyId,
+        userId: userId,
     });
 
     if (!company) {
         throw new ApiError(404, "Company not found or user not authorized.");
     }
 
-    return prisma.company.delete({
-        where: { id: companyId },
-    });
+    return Company.findByIdAndDelete(companyId);
 };
 
 export {

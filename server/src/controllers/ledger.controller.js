@@ -1,9 +1,18 @@
-import { PrismaClient, LedgerType } from '@prisma/client';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiErrors.js';
+import Ledger from '../models/ledger.models.js';
 
-const prisma = new PrismaClient();
+const LedgerType = {
+  CUSTOMER: 'CUSTOMER',
+  SUPPLIER: 'SUPPLIER',
+  BANK: 'BANK',
+  CASH: 'CASH',
+  ASSET: 'ASSET',
+  LIABILITY: 'LIABILITY',
+  INCOME: 'INCOME',
+  EXPENSE: 'EXPENSE'
+};
 
 const createLedger = asyncHandler(async (req, res) => {
   const { name, type, openingBalance, companyId } = req.body;
@@ -16,16 +25,12 @@ const createLedger = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Invalid ledger type');
   }
 
-  const newLedger = await prisma.ledger.create({
-    data: {
-      name,
-      type,
-      openingBalance: openingBalance || 0,
-      currentBalance: openingBalance || 0,
-      company: {
-        connect: { id: companyId },
-      },
-    },
+  const newLedger = await Ledger.create({
+    name,
+    type,
+    openingBalance: openingBalance || 0,
+    currentBalance: openingBalance || 0,
+    companyId: companyId,
   });
 
   return res
@@ -46,14 +51,14 @@ const getLedgers = asyncHandler(async (req, res) => {
   }
 
   const where = {
-    companyId: parseInt(companyId),
+    companyId: companyId,
   };
 
   if (type && Object.values(LedgerType).includes(type)) {
     where.type = type;
   }
 
-  const ledgers = await prisma.ledger.findMany({ where, orderBy: { name: 'asc' } });
+  const ledgers = await Ledger.find(where).sort({ name: 1 });
   return res.status(200).json(new ApiResponse(200, ledgers, "Ledgers fetched successfully"));
 });
 
@@ -61,20 +66,11 @@ const updateLedger = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const data = req.body;
 
-  const ledgerId = parseInt(id);
-  if (isNaN(ledgerId)) {
-    throw new ApiError(400, "Invalid Ledger ID");
-  }
+  const updatedLedger = await Ledger.findByIdAndUpdate(id, data, { new: true });
 
-  const updatedLedger = await prisma.ledger.update({
-    where: { id: ledgerId },
-    data,
-  }).catch(error => {
-    if (error.code === 'P2025') {
-      throw new ApiError(404, 'Ledger not found');
-    }
-    throw error;
-  });
+  if (!updatedLedger) {
+    throw new ApiError(404, 'Ledger not found');
+  }
 
   return res.status(200).json(new ApiResponse(200, updatedLedger, "Ledger updated successfully"));
 });

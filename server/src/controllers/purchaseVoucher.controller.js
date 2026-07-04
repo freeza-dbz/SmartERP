@@ -1,9 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import mongoose from 'mongoose';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiErrors.js';
-
-const prisma = new PrismaClient();
+import PurchaseVoucher from '../models/purchase.models.js';
+import StockItem from '../models/stockItem.models.js';
+import Ledger from '../models/ledger.models.js';
 
 export const createPurchaseVoucher = asyncHandler(async (req, res) => {
   const { voucherNo, date, totalAmount, supplierId, companyId, items } = req.body;
@@ -12,57 +13,55 @@ export const createPurchaseVoucher = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Missing required fields.');
   }
 
-  const result = await prisma.$transaction(async (tx) => {
-    // 1. Create the PurchaseVoucher
-    const purchaseVoucher = await tx.purchaseVoucher.create({
-      data: {
-        voucherNo,
-        date: new Date(date),
-        totalAmount,
-        supplierId,
-        companyId,
-      },
-    });
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-    // 2. Create PurchaseVoucherItem entries and update stock
+  let purchaseVoucher;
+  try {
+    // 1. Create the PurchaseVoucher (with embedded items)
+    const purchaseVoucherArr = await PurchaseVoucher.create([{
+      voucherNo,
+      date: new Date(date),
+      totalAmount,
+      supplierId,
+      companyId,
+      items: items.map(item => ({
+        itemId: item.itemId,
+        quantity: item.quantity,
+        rate: item.rate,
+        amount: item.quantity * item.rate
+      }))
+    }], { session });
+
+    purchaseVoucher = purchaseVoucherArr[0];
+
+    // 2. Update stock item's current stock
     for (const item of items) {
-      // Create purchase voucher item
-      await tx.purchaseVoucherItem.create({
-        data: {
-          voucherId: purchaseVoucher.id,
-          itemId: item.itemId,
-          quantity: item.quantity,
-          rate: item.rate,
-        },
-      });
-
-      // Update stock item's current stock
-      await tx.stockItem.update({
-        where: { id: item.itemId },
-        data: {
-          currentStock: {
-            increment: item.quantity,
-          },
-        },
-      });
+      await StockItem.findByIdAndUpdate(
+        item.itemId,
+        { $inc: { currentStock: item.quantity } },
+        { session }
+      );
     }
 
     // 3. Update supplier's balance
-    await tx.ledger.update({
-      where: { id: supplierId },
-      data: {
-        currentBalance: {
-          increment: totalAmount, // Purchase increases liability (amount to be paid)
-        },
-      },
-    });
+    await Ledger.findByIdAndUpdate(
+      supplierId,
+      { $inc: { currentBalance: totalAmount } },
+      { session }
+    );
 
-    return purchaseVoucher;
-  });
+    await session.commitTransaction();
+  } catch (error) {
+    await session.abortTransaction();
+    throw new ApiError(500, error.message || 'Transaction failed');
+  } finally {
+    session.endSession();
+  }
 
   return res
     .status(201)
-    .json(new ApiResponse(201, result, 'Purchase voucher created successfully'));
+    .json(new ApiResponse(201, purchaseVoucher, 'Purchase voucher created successfully'));
 });
 
 export const getPurchaseVouchers = asyncHandler(async (req, res) => {
@@ -72,24 +71,28 @@ export const getPurchaseVouchers = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Company ID is required.');
   }
 
-  const purchaseVouchers = await prisma.purchaseVoucher.findMany({
-    where: {
-      companyId: parseInt(companyId),
-    },
-    include: {
-      supplier: true,
-      items: {
-        include: {
-          item: true,
-        },
-      },
-    },
-    orderBy: {
-      date: 'desc',
-    },
+  const purchaseVouchers = await PurchaseVoucher.find({ companyId })
+    .populate('supplierId')
+    .populate({
+      path: 'items.itemId',
+      model: 'StockItem'
+    })
+    .sort({ date: -1 });
+
+  // Map to old Prisma structure to ensure frontend works correctly
+  const formatted = purchaseVouchers.map(voucher => {
+    const doc = voucher.toObject();
+    doc.id = doc._id;
+    doc.supplier = doc.supplierId;
+    doc.items = doc.items.map(item => {
+      item.item = item.itemId;
+      item.id = item._id;
+      return item;
+    });
+    return doc;
   });
 
   return res
     .status(200)
-    .json(new ApiResponse(200, purchaseVouchers, 'Purchase vouchers fetched successfully'));
+    .json(new ApiResponse(200, formatted, 'Purchase vouchers fetched successfully'));
 });

@@ -5,20 +5,17 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./src/index.js",
-    "dev": "nodemon ./src/index.js",
-    "postinstall": "prisma generate"
+    "dev": "nodemon ./src/index.js"
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
-    "prettier": "^3.8.4",
-    "prisma": "^6.16.2"
+    "prettier": "^3.8.4"
   },
   "keywords": [],
   "author": "Anmol Singh",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^6.16.2",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -27,6 +24,7 @@
     "fs": "^0.0.1-security",
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.7.3",
     "node": "^24.18.0",
     "pdf-lib": "^1.17.1"
   }

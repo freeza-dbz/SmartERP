@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiErrors.js';
-
-const prisma = new PrismaClient();
+import StockItem from '../models/stockItem.models.js';
 
 /**
  * Create a new Stock Item
@@ -26,19 +24,17 @@ const createStockItem = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Name, unitId, groupId, and companyId are required');
   }
 
-  const newItem = await prisma.stockItem.create({
-    data: {
-      name,
-      sku,
-      purchasePrice,
-      sellingPrice,
-      gstRate,
-      openingStock,
-      currentStock: openingStock, // Initialize currentStock with openingStock
-      unitId,
-      groupId,
-      companyId,
-    },
+  const newItem = await StockItem.create({
+    name,
+    sku,
+    purchasePrice,
+    sellingPrice,
+    gstRate,
+    openingStock,
+    currentStock: openingStock, // Initialize currentStock with openingStock
+    unitId,
+    groupId,
+    companyId,
   });
 
   return res
@@ -57,18 +53,23 @@ const getStockItems = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'companyId query parameter is required');
   }
 
-  const items = await prisma.stockItem.findMany({
-    where: { companyId: parseInt(companyId) },
-    include: {
-      unit: true,
-      stockGroup: true,
-    },
-    orderBy: { name: 'asc' },
+  const items = await StockItem.find({ companyId })
+    .populate('unitId')
+    .populate('groupId')
+    .sort({ name: 1 });
+
+  // Map populated fields to match old Prisma structure if frontend depends on it
+  const formattedItems = items.map(item => {
+    const doc = item.toObject();
+    doc.unit = doc.unitId;
+    doc.stockGroup = doc.groupId;
+    doc.id = doc._id;
+    return doc;
   });
 
   return res
     .status(200)
-    .json(new ApiResponse(200, items, 'Stock items fetched successfully'));
+    .json(new ApiResponse(200, formattedItems, 'Stock items fetched successfully'));
 });
 
 /**
@@ -79,20 +80,11 @@ const updateStockItem = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const data = req.body;
 
-  const itemId = parseInt(id);
-  if (isNaN(itemId)) {
-    throw new ApiError(400, 'Invalid Stock Item ID');
-  }
+  const updatedItem = await StockItem.findByIdAndUpdate(id, data, { new: true });
 
-  const updatedItem = await prisma.stockItem.update({
-      where: { id: itemId },
-      data,
-    }).catch(error => {
-      if (error.code === 'P2025') {
-        throw new ApiError(404, 'Stock item not found');
-      }
-      throw error;
-    });
+  if (!updatedItem) {
+    throw new ApiError(404, 'Stock item not found');
+  }
 
   return res
     .status(200)

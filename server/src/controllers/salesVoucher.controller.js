@@ -1,10 +1,12 @@
-import { PrismaClient } from '@prisma/client';
+import mongoose from 'mongoose';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiErrors.js';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-
-const prisma = new PrismaClient();
+import SalesVoucher from '../models/saleVouchers.models.js';
+import StockItem from '../models/stockItem.models.js';
+import Ledger from '../models/ledger.models.js';
+import Company from '../models/company.model.js';
 
 export const createSalesVoucher = asyncHandler(async (req, res) => {
   const { invoiceNo, invoiceDate, totalAmount, customerId, companyId, items } = req.body;
@@ -13,20 +15,22 @@ export const createSalesVoucher = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Missing required fields.');
   }
 
-  const result = await prisma.$transaction(async (tx) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  let salesVoucher;
+  try {
     // 1. Check for sufficient stock for all items
     const itemIds = items.map((item) => item.itemId);
-    const stockItems = await tx.stockItem.findMany({
-      where: { id: { in: itemIds } },
-    });
+    const stockItems = await StockItem.find({ _id: { $in: itemIds } }).session(session);
 
     const stockMap = new Map(
-      stockItems.map((si) => [si.id, { currentStock: si.currentStock, name: si.name }])
+      stockItems.map((si) => [si._id.toString(), { currentStock: si.currentStock, name: si.name }])
     );
 
     for (const item of items) {
-      const stockInfo = stockMap.get(item.itemId);
-      if (!stockInfo || stockInfo.currentStock.lessThan(item.quantity)) {
+      const stockInfo = stockMap.get(item.itemId.toString());
+      if (!stockInfo || stockInfo.currentStock < item.quantity) {
         throw new ApiError(
           400,
           `Insufficient stock for item: ${stockInfo?.name || `ID ${item.itemId}`}. Available: ${stockInfo?.currentStock || 0}, Required: ${item.quantity}`
@@ -35,54 +39,49 @@ export const createSalesVoucher = asyncHandler(async (req, res) => {
     }
 
     // 2. Create the SalesVoucher
-    const salesVoucher = await tx.salesVoucher.create({
-      data: {
-        invoiceNo,
-        invoiceDate: new Date(invoiceDate),
-        totalAmount,
-        customerId,
-        companyId,
-      },
-    });
+    const salesVoucherArr = await SalesVoucher.create([{
+      invoiceNo,
+      invoiceDate: new Date(invoiceDate),
+      totalAmount,
+      customerId,
+      companyId,
+      items: items.map(item => ({
+        itemId: item.itemId,
+        quantity: item.quantity,
+        rate: item.rate,
+        amount: item.quantity * item.rate
+      }))
+    }], { session });
 
-    // 3. Create SalesVoucherItem entries and update stock
+    salesVoucher = salesVoucherArr[0];
+
+    // 3. Update stock item's current stock
     for (const item of items) {
-      await tx.salesVoucherItem.create({
-        data: {
-          voucherId: salesVoucher.id,
-          itemId: item.itemId,
-          quantity: item.quantity,
-          rate: item.rate,
-        },
-      });
-
-      // Decrease stock item's current stock
-      await tx.stockItem.update({
-        where: { id: item.itemId },
-        data: {
-          currentStock: {
-            decrement: item.quantity,
-          },
-        },
-      });
+      await StockItem.findByIdAndUpdate(
+        item.itemId,
+        { $inc: { currentStock: -item.quantity } },
+        { session }
+      );
     }
 
     // 4. Update customer's balance (increase receivable)
-    await tx.ledger.update({
-      where: { id: customerId },
-      data: {
-        currentBalance: {
-          increment: totalAmount,
-        },
-      },
-    });
+    await Ledger.findByIdAndUpdate(
+      customerId,
+      { $inc: { currentBalance: totalAmount } },
+      { session }
+    );
 
-    return salesVoucher;
-  });
+    await session.commitTransaction();
+  } catch (error) {
+    await session.abortTransaction();
+    throw new ApiError(error.statusCode || 500, error.message || 'Transaction failed');
+  } finally {
+    session.endSession();
+  }
 
   return res
     .status(201)
-    .json(new ApiResponse(201, result, 'Sales voucher created successfully'));
+    .json(new ApiResponse(201, salesVoucher, 'Sales voucher created successfully'));
 });
 
 export const getSalesVouchers = asyncHandler(async (req, res) => {
@@ -92,47 +91,55 @@ export const getSalesVouchers = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Company ID is required.');
   }
 
-  const salesVouchers = await prisma.salesVoucher.findMany({
-    where: {
-      companyId: parseInt(companyId),
-    },
-    include: {
-      customer: true,
-      items: {
-        include: {
-          item: true,
-        },
-      },
-    },
-    orderBy: {
-      invoiceDate: 'desc',
-    },
+  const salesVouchers = await SalesVoucher.find({ companyId })
+    .populate('customerId')
+    .populate({
+      path: 'items.itemId',
+      model: 'StockItem'
+    })
+    .sort({ invoiceDate: -1 });
+
+  // Map to old Prisma structure
+  const formatted = salesVouchers.map(voucher => {
+    const doc = voucher.toObject();
+    doc.id = doc._id;
+    doc.customer = doc.customerId;
+    doc.items = doc.items.map(item => {
+      item.item = item.itemId;
+      item.id = item._id;
+      return item;
+    });
+    return doc;
   });
 
   return res
     .status(200)
-    .json(new ApiResponse(200, salesVouchers, 'Sales vouchers fetched successfully'));
+    .json(new ApiResponse(200, formatted, 'Sales vouchers fetched successfully'));
 });
 
 export const generateSalesVoucherPDF = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const sale = await prisma.salesVoucher.findUnique({
-    where: { id: parseInt(id) },
-    include: {
-      company: true,
-      customer: true,
-      items: {
-        include: {
-          item: true,
-        },
-      },
-    },
-  });
+  const sale = await SalesVoucher.findById(id)
+    .populate('companyId')
+    .populate('customerId')
+    .populate({
+      path: 'items.itemId',
+      model: 'StockItem'
+    });
 
   if (!sale) {
     throw new ApiError(404, 'Sales voucher not found');
   }
+
+  // format for PDF code backward compatibility
+  const saleDoc = sale.toObject();
+  saleDoc.company = saleDoc.companyId;
+  saleDoc.customer = saleDoc.customerId;
+  saleDoc.items = saleDoc.items.map(i => {
+      i.item = i.itemId;
+      return i;
+  });
 
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage();
@@ -155,7 +162,7 @@ export const generateSalesVoucherPDF = asyncHandler(async (req, res) => {
     color: rgb(0.1, 0.1, 0.1),
   });
 
-  const companyNameText = sale.company.name;
+  const companyNameText = saleDoc.company.name;
   const companyNameWidth = boldFont.widthOfTextAtSize(companyNameText, subHeaderFontSize);
   page.drawText(companyNameText, {
     x: width - margin - companyNameWidth,
@@ -172,22 +179,22 @@ export const generateSalesVoucherPDF = asyncHandler(async (req, res) => {
 
   page.drawText('Bill From:', { x: companyX, y, font: boldFont, size: fontSize });
   y -= fontSize + 5;
-  page.drawText(sale.company.name, { x: companyX, y, font, size: fontSize });
+  page.drawText(saleDoc.company.name, { x: companyX, y, font, size: fontSize });
   y -= fontSize + 5;
-  page.drawText(sale.company.address || '', { x: companyX, y, font, size: fontSize, maxWidth: (width / 2) - (margin * 2) });
+  page.drawText(saleDoc.company.address || '', { x: companyX, y, font, size: fontSize, maxWidth: (width / 2) - (margin * 2) });
   y -= fontSize + 5;
-  page.drawText(`GSTIN: ${sale.company.gstNumber || ''}`, { x: companyX, y, font, size: fontSize });
+  page.drawText(`GSTIN: ${saleDoc.company.gstNumber || ''}`, { x: companyX, y, font, size: fontSize });
 
   let yCustomer = height - margin - headerFontSize - 20;
   page.drawText('Bill To:', { x: customerX, y: yCustomer, font: boldFont, size: fontSize });
   yCustomer -= fontSize + 5;
-  page.drawText(sale.customer.name, { x: customerX, y: yCustomer, font, size: fontSize });
+  page.drawText(saleDoc.customer.name, { x: customerX, y: yCustomer, font, size: fontSize });
 
   y = Math.min(y, yCustomer) - 30;
 
   // Invoice details
-  page.drawText(`Invoice No: ${sale.invoiceNo}`, { x: margin, y, font: boldFont, size: fontSize });
-  const dateText = `Date: ${new Date(sale.invoiceDate).toLocaleDateString()}`;
+  page.drawText(`Invoice No: ${saleDoc.invoiceNo}`, { x: margin, y, font: boldFont, size: fontSize });
+  const dateText = `Date: ${new Date(saleDoc.invoiceDate).toLocaleDateString()}`;
   const dateTextWidth = boldFont.widthOfTextAtSize(dateText, fontSize);
   page.drawText(dateText, { x: width - margin - dateTextWidth, y, font: boldFont, size: fontSize });
   y -= fontSize + 20;
@@ -208,7 +215,7 @@ export const generateSalesVoucherPDF = asyncHandler(async (req, res) => {
   y -= 10;
 
   // Table Rows
-  sale.items.forEach((saleItem) => {
+  saleDoc.items.forEach((saleItem) => {
     const itemAmount = Number(saleItem.quantity) * Number(saleItem.rate);
     page.drawText(saleItem.item.name, { x: itemX, y, font, size: fontSize, maxWidth: qtyX - itemX - 10 });
     page.drawText(saleItem.quantity.toString(), { x: qtyX, y, font, size: fontSize });
@@ -222,13 +229,13 @@ export const generateSalesVoucherPDF = asyncHandler(async (req, res) => {
   y -= 10;
 
   // Total
-  const totalText = `Total: ${Number(sale.totalAmount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}`;
+  const totalText = `Total: ${Number(saleDoc.totalAmount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}`;
   const totalTextWidth = boldFont.widthOfTextAtSize(totalText, subHeaderFontSize);
   page.drawText(totalText, { x: width - margin - totalTextWidth, y, font: boldFont, size: subHeaderFontSize });
 
   const pdfBytes = await pdfDoc.save();
 
   res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename=invoice-${sale.invoiceNo}.pdf`);
+  res.setHeader('Content-Disposition', `attachment; filename=invoice-${saleDoc.invoiceNo}.pdf`);
   res.send(Buffer.from(pdfBytes));
 });

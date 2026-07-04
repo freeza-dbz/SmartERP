@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiErrors.js';
-
-const prisma = new PrismaClient();
+import Unit from '../models/unit.models.js';
 
 /**
  * Create a new Unit
@@ -16,12 +14,10 @@ const createUnit = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Name, shortName, and companyId are required');
   }
 
-  const newUnit = await prisma.unit.create({
-    data: {
-      name,
-      shortName,
-      companyId,
-    },
+  const newUnit = await Unit.create({
+    name,
+    shortName,
+    companyId,
   });
 
   return res
@@ -40,10 +36,7 @@ const getUnits = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'companyId query parameter is required');
   }
 
-  const units = await prisma.unit.findMany({
-    where: { companyId: parseInt(companyId) },
-    orderBy: { name: 'asc' },
-  });
+  const units = await Unit.find({ companyId }).sort({ name: 1 });
 
   return res
     .status(200)
