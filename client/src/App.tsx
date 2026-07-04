@@ -24,13 +24,13 @@ function PageRouter() {
     }
   }, [user, currentPage, setCurrentPage]);
 
-  // Auth pages (no layout)
-  if (currentPage === 'login' || !user) {
-    return <LoginPage />;
-  }
-
+  // Auth pages (no layout) — register must be checked before the !user fallback
   if (currentPage === 'register') {
     return <RegisterPage />;
+  }
+
+  if (currentPage === 'login' || !user) {
+    return <LoginPage />;
   }
 
   // Company selection page (no main layout)
