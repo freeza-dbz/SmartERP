@@ -41,5 +41,17 @@ app.use("/api/v1/sales-vouchers", salesVoucherRoutes);
 app.use("/api/v1/purchase-vouchers", purchaseVoucherRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 
+// Global error handler — must be defined after all routes
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    return res.status(statusCode).json({
+        success: false,
+        statusCode,
+        message,
+        errors: err.errors || [],
+    });
+});
 
 export { app };

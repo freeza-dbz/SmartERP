@@ -14,25 +14,7 @@ export function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const passwordStrength = () => {
-    if (!password) return { score: 0, label: '', color: '' };
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
 
-    const config = [
-      { label: 'Very Weak', color: 'bg-error-500' },
-      { label: 'Weak', color: 'bg-warning-500' },
-      { label: 'Fair', color: 'bg-warning-400' },
-      { label: 'Good', color: 'bg-success-500' },
-      { label: 'Strong', color: 'bg-success-600' },
-    ];
-
-    return { score, ...config[score - 1] || { label: '', color: '' } };
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +64,6 @@ export function RegisterPage() {
     }
   };
 
-  const strength = passwordStrength();
 
   return (
     <div className="min-h-screen flex">
@@ -124,40 +105,25 @@ export function RegisterPage() {
               leftIcon={<Mail className="w-4 h-4" />}
             />
 
-            <div>
-              <Input
-                label="Password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Create a password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                error={errors.password}
-                required
-                leftIcon={<Lock className="w-4 h-4" />}
-                rightIcon={
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                }
-              />
-              {password && (
-                <div className="mt-2">
-                  <div className="flex gap-1 mb-1">
-                    {[1, 2, 3, 4, 5].map(i => (
-                      <div
-                        key={i}
-                        className={`h-1.5 flex-1 rounded-full ${i <= strength.score ? strength.color : 'bg-slate-200 dark:bg-slate-700'}`}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-xs text-slate-500">{strength.label}</p>
-                </div>
-              )}
-            </div>
+            <Input
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Create a password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              error={errors.password}
+              required
+              leftIcon={<Lock className="w-4 h-4" />}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              }
+            />
 
             <Input
               label="Confirm Password"
