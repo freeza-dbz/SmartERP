@@ -29,6 +29,7 @@ import stockItemRoutes from "./routes/stockItem.routes.js"
 import salesVoucherRoutes from "./routes/salesVoucher.routes.js"
 import purchaseVoucherRoutes from "./routes/purchaseVoucher.routes.js"
 import dashboardRoutes from "./routes/dashboard.routes.js"
+import reportsRoutes from "./routes/reports.routes.js"
 
 // Health check
 app.get("/health", (req, res) => res.json({ status: "ok" }));
@@ -43,6 +44,7 @@ app.use("/api/v1/items", stockItemRoutes);
 app.use("/api/v1/sales-vouchers", salesVoucherRoutes);
 app.use("/api/v1/purchase-vouchers", purchaseVoucherRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/reports", reportsRoutes);
 
 // Global error handler — must be defined after all routes
 app.use((err, req, res, next) => {

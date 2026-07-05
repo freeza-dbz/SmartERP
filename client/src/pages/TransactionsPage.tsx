@@ -61,11 +61,10 @@ export function SalesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-slate-900 dark:text-white">156</p><p className="text-sm text-slate-500">This Month</p></CardContent></Card>
-        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-success-600">142</p><p className="text-sm text-slate-500">Confirmed</p></CardContent></Card>
-        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-warning-600">8</p><p className="text-sm text-slate-500">Draft</p></CardContent></Card>
-        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-error-600">6</p><p className="text-sm text-slate-500">Cancelled</p></CardContent></Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-slate-900 dark:text-white">{sales.length}</p><p className="text-sm text-slate-500">Total Vouchers</p></CardContent></Card>
+        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-success-600">₹ {sales.reduce((s: number, v: any) => s + Number(v.totalAmount || 0), 0).toLocaleString('en-IN')}</p><p className="text-sm text-slate-500">Total Revenue</p></CardContent></Card>
+        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-primary-600">{sales.filter((v: any) => { const d = new Date(v.invoiceDate); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length}</p><p className="text-sm text-slate-500">This Month</p></CardContent></Card>
       </div>
 
       <Card>
@@ -301,11 +300,10 @@ export function PurchasesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-slate-900 dark:text-white">89</p><p className="text-sm text-slate-500">This Month</p></CardContent></Card>
-        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-success-600">76</p><p className="text-sm text-slate-500">Confirmed</p></CardContent></Card>
-        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-warning-600">10</p><p className="text-sm text-slate-500">Pending</p></CardContent></Card>
-        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-error-600">3</p><p className="text-sm text-slate-500">Cancelled</p></CardContent></Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-slate-900 dark:text-white">{purchases.length}</p><p className="text-sm text-slate-500">Total Vouchers</p></CardContent></Card>
+        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-error-600">₹ {purchases.reduce((s: number, v: any) => s + Number(v.totalAmount || 0), 0).toLocaleString('en-IN')}</p><p className="text-sm text-slate-500">Total Purchases</p></CardContent></Card>
+        <Card><CardContent className="text-center py-4"><p className="text-2xl font-bold text-primary-600">{purchases.filter((v: any) => { const d = new Date(v.date); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length}</p><p className="text-sm text-slate-500">This Month</p></CardContent></Card>
       </div>
 
       <Card>
@@ -456,6 +454,29 @@ function PurchaseVoucherModal({ open, onClose, onSave }: PurchaseVoucherModalPro
 }
 
 export function ReceiptsPage() {
+  const { selectedCompany, addToast } = useApp();
+  const [loading, setLoading] = useState(true);
+  const [receipts, setReceipts] = useState<any[]>([]);
+  const [thisMonthTotal, setThisMonthTotal] = useState(0);
+  const [transactionCount, setTransactionCount] = useState(0);
+  const [outstandingTotal, setOutstandingTotal] = useState(0);
+
+  useEffect(() => {
+    if (!selectedCompany) return;
+    const companyId = selectedCompany._id || selectedCompany.id;
+    setLoading(true);
+    api.get(`/reports/receipts?companyId=${companyId}`)
+      .then(res => {
+        const d = res.data.data;
+        setReceipts(d.receipts);
+        setThisMonthTotal(d.thisMonthTotal);
+        setTransactionCount(d.transactionCount);
+        setOutstandingTotal(d.outstandingTotal);
+      })
+      .catch(() => addToast({ type: 'error', title: 'Failed to load receipts' }))
+      .finally(() => setLoading(false));
+  }, [selectedCompany, addToast]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -472,40 +493,42 @@ export function ReceiptsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-success-600">₹ 12.5L</p><p className="text-sm text-slate-500 mt-1">This Month</p></CardContent></Card>
-        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-slate-900 dark:text-white">45</p><p className="text-sm text-slate-500 mt-1">Transactions</p></CardContent></Card>
-        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-warning-600">₹ 18.4L</p><p className="text-sm text-slate-500 mt-1">Outstanding</p></CardContent></Card>
+        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-success-600">₹ {thisMonthTotal.toLocaleString('en-IN')}</p><p className="text-sm text-slate-500 mt-1">This Month</p></CardContent></Card>
+        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-slate-900 dark:text-white">{transactionCount}</p><p className="text-sm text-slate-500 mt-1">Transactions</p></CardContent></Card>
+        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-warning-600">₹ {outstandingTotal.toLocaleString('en-IN')}</p><p className="text-sm text-slate-500 mt-1">Outstanding</p></CardContent></Card>
       </div>
 
       <Card>
         <CardHeader>Recent Receipts</CardHeader>
         <CardContent className="p-0">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800/50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Receipt No</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Date</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Customer</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Mode</th>
-                <th className="px-4 py-3 text-right font-medium text-slate-500">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-              {[
-                { no: 'RCT-001', date: '2024-01-15', customer: 'ABC Corp', mode: 'Bank Transfer', amount: 50000 },
-                { no: 'RCT-002', date: '2024-01-15', customer: 'XYZ Ltd', mode: 'Cash', amount: 25000 },
-                { no: 'RCT-003', date: '2024-01-14', customer: 'Global Traders', mode: 'Cheque', amount: 35000 },
-              ].map(r => (
-                <tr key={r.no} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
-                  <td className="px-4 py-3 font-mono text-primary-600">{r.no}</td>
-                  <td className="px-4 py-3">{r.date}</td>
-                  <td className="px-4 py-3">{r.customer}</td>
-                  <td className="px-4 py-3">{r.mode}</td>
-                  <td className="px-4 py-3 text-right font-medium">₹ {r.amount.toLocaleString('en-IN')}</td>
+          {loading ? (
+            <p className="text-center py-8 text-slate-500">Loading...</p>
+          ) : receipts.length === 0 ? (
+            <p className="text-center py-8 text-slate-500">No receipts yet. Create a Sales Voucher to record a receipt.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 dark:bg-slate-800/50">
+                <tr>
+                  <th className="px-4 py-3 text-left font-medium text-slate-500">Receipt No</th>
+                  <th className="px-4 py-3 text-left font-medium text-slate-500">Date</th>
+                  <th className="px-4 py-3 text-left font-medium text-slate-500">Customer</th>
+                  <th className="px-4 py-3 text-left font-medium text-slate-500">Mode</th>
+                  <th className="px-4 py-3 text-right font-medium text-slate-500">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                {receipts.map(r => (
+                  <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
+                    <td className="px-4 py-3 font-mono text-primary-600">{r.receiptNo}</td>
+                    <td className="px-4 py-3">{new Date(r.date).toLocaleDateString('en-IN')}</td>
+                    <td className="px-4 py-3">{r.customer}</td>
+                    <td className="px-4 py-3">{r.mode}</td>
+                    <td className="px-4 py-3 text-right font-medium">₹ {Number(r.amount).toLocaleString('en-IN')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -513,6 +536,29 @@ export function ReceiptsPage() {
 }
 
 export function PaymentsPage() {
+  const { selectedCompany, addToast } = useApp();
+  const [loading, setLoading] = useState(true);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [thisMonthTotal, setThisMonthTotal] = useState(0);
+  const [transactionCount, setTransactionCount] = useState(0);
+  const [outstandingTotal, setOutstandingTotal] = useState(0);
+
+  useEffect(() => {
+    if (!selectedCompany) return;
+    const companyId = selectedCompany._id || selectedCompany.id;
+    setLoading(true);
+    api.get(`/reports/payments?companyId=${companyId}`)
+      .then(res => {
+        const d = res.data.data;
+        setPayments(d.payments);
+        setThisMonthTotal(d.thisMonthTotal);
+        setTransactionCount(d.transactionCount);
+        setOutstandingTotal(d.outstandingTotal);
+      })
+      .catch(() => addToast({ type: 'error', title: 'Failed to load payments' }))
+      .finally(() => setLoading(false));
+  }, [selectedCompany, addToast]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -529,15 +575,42 @@ export function PaymentsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-error-600">₹ 8.2L</p><p className="text-sm text-slate-500 mt-1">This Month</p></CardContent></Card>
-        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-slate-900 dark:text-white">32</p><p className="text-sm text-slate-500 mt-1">Transactions</p></CardContent></Card>
-        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-warning-600">₹ 8.9L</p><p className="text-sm text-slate-500 mt-1">Outstanding</p></CardContent></Card>
+        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-error-600">₹ {thisMonthTotal.toLocaleString('en-IN')}</p><p className="text-sm text-slate-500 mt-1">This Month</p></CardContent></Card>
+        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-slate-900 dark:text-white">{transactionCount}</p><p className="text-sm text-slate-500 mt-1">Transactions</p></CardContent></Card>
+        <Card><CardContent className="text-center py-6"><p className="text-3xl font-bold text-warning-600">₹ {outstandingTotal.toLocaleString('en-IN')}</p><p className="text-sm text-slate-500 mt-1">Outstanding</p></CardContent></Card>
       </div>
 
       <Card>
         <CardHeader>Recent Payments</CardHeader>
-        <CardContent>
-          <p className="text-slate-500 text-center py-8">No recent payments</p>
+        <CardContent className="p-0">
+          {loading ? (
+            <p className="text-center py-8 text-slate-500">Loading...</p>
+          ) : payments.length === 0 ? (
+            <p className="text-center py-8 text-slate-500">No payments yet. Create a Purchase Voucher to record a payment.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 dark:bg-slate-800/50">
+                <tr>
+                  <th className="px-4 py-3 text-left font-medium text-slate-500">Voucher No</th>
+                  <th className="px-4 py-3 text-left font-medium text-slate-500">Date</th>
+                  <th className="px-4 py-3 text-left font-medium text-slate-500">Supplier</th>
+                  <th className="px-4 py-3 text-left font-medium text-slate-500">Mode</th>
+                  <th className="px-4 py-3 text-right font-medium text-slate-500">Amount</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                {payments.map(p => (
+                  <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
+                    <td className="px-4 py-3 font-mono text-primary-600">{p.paymentNo}</td>
+                    <td className="px-4 py-3">{new Date(p.date).toLocaleDateString('en-IN')}</td>
+                    <td className="px-4 py-3">{p.supplier}</td>
+                    <td className="px-4 py-3">{p.mode}</td>
+                    <td className="px-4 py-3 text-right font-medium">₹ {Number(p.amount).toLocaleString('en-IN')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </CardContent>
       </Card>
     </div>
