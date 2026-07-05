@@ -46,7 +46,7 @@ interface StockItem {
 
 export function CustomersPage() {
   const { addToast, selectedCompany } = useApp();
-  const companyId = selectedCompany ? parseInt(selectedCompany.id) : 1;
+  const companyId = selectedCompany ? selectedCompany.id : '1';
   const token = localStorage.getItem('token') || 'mock-token';
   const [customers, setCustomers] = useState<Ledger[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -242,7 +242,7 @@ function CustomerModal({ open, onClose, customer, onSave }: CustomerModalProps) 
 
 export function SuppliersPage() {
   const { addToast, selectedCompany } = useApp();
-  const companyId = selectedCompany ? parseInt(selectedCompany.id) : 1;
+  const companyId = selectedCompany ? selectedCompany.id : '1';
   const token = localStorage.getItem('token') || 'mock-token';
   const [suppliers, setSuppliers] = useState<Ledger[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -440,7 +440,7 @@ function SupplierModal({ open, onClose, supplier, onSave }: SupplierModalProps) 
 
 export function StockItemsPage() {
   const { addToast, selectedCompany } = useApp();
-  const companyId = selectedCompany ? parseInt(selectedCompany.id) : 1;
+  const companyId = selectedCompany ? selectedCompany.id : '1';
   const token = localStorage.getItem('token') || 'mock-token';
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
