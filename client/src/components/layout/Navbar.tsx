@@ -242,12 +242,10 @@ export function Navbar() {
             )}
           </button>
 
-          {/* User menu */}
-          <div className="relative">
-            <button
-              onClick={() => setShowUserDropdown(!showUserDropdown)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
-            >
+          {/* User avatar and name (no click) */}
+          <div className="relative flex items-center gap-2">
+            {/* Avatar and name */}
+            <div className="flex items-center gap-2 px-3 py-1.5">
               <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center shadow">
                 <span className="text-white text-sm font-bold">
                   {(user?.name || 'U')[0].toUpperCase()}
@@ -259,79 +257,6 @@ export function Navbar() {
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Administrator</p>
               </div>
-              <ChevronDown className="w-4 h-4 text-slate-400" />
-            </button>
-
-            {showUserDropdown && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => { setShowUserDropdown(false); setShowProfileCard(false); }} />
-                <div className="absolute top-full right-0 mt-1 w-56 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl z-20 overflow-hidden">
-
-                  {/* Profile hover card */}
-                  <div
-                    className="relative group"
-                    onMouseEnter={() => setShowProfileCard(true)}
-                    onMouseLeave={() => setShowProfileCard(false)}
-                  >
-                    <button className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
-                      <div className="w-7 h-7 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white text-xs font-bold">{(user?.name || 'U')[0].toUpperCase()}</span>
-                      </div>
-                      <span className="font-medium">Profile</span>
-                    </button>
-
-                    {/* Hover popover — shows to the left */}
-                    {showProfileCard && (
-                      <div className="absolute right-full top-0 mr-2 w-64 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl z-30 p-4 pointer-events-none">
-                        {/* Gradient header */}
-                        <div className="bg-gradient-to-r from-primary-500 to-primary-700 -mx-4 -mt-4 px-4 pt-4 pb-6 rounded-t-xl mb-3">
-                          <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center mx-auto">
-                            <span className="text-white text-xl font-bold">{(user?.name || 'U')[0].toUpperCase()}</span>
-                          </div>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
-                            <User className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                            <span className="font-semibold truncate">{user?.name || '—'}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                            <AtSign className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                            <span className="truncate">{user?.username || '—'}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-                            <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                            <span className="truncate text-xs">{user?.email || '—'}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Settings */}
-                  <button
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    onClick={() => { setShowSettingsModal(true); setShowUserDropdown(false); }}
-                  >
-                    <Settings className="w-4 h-4 text-slate-400" />
-                    Settings
-                  </button>
-
-                  <hr className="my-1 border-slate-200 dark:border-slate-700" />
-
-                  {/* Sign out */}
-                  <button
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-error-50 dark:hover:bg-error-900/20 text-error-600 dark:text-error-400 transition-colors"
-                    onClick={() => {
-                      setUser(null);
-                      setSelectedCompany(null);
-                      localStorage.removeItem('token');
-                      setCurrentPage('login');
-                    }}
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Sign Out
-                  </button>
-                </div>
               </>
             )}
           </div>
