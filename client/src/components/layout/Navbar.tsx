@@ -257,7 +257,29 @@ export function Navbar() {
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Administrator</p>
               </div>
-            </>
+            </div>
+            {/* Dropdown toggle */}
+            <button
+              onClick={() => setShowUserDropdown(!showUserDropdown)}
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
+              <ChevronDown className="w-4 h-4 text-slate-500" />
+            </button>
+
+            {/* Dropdown menu – Profile button removed */}
+            {showUserDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={() => {
+                    // logout logic here
+                    setShowUserDropdown(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign out
+                </button>
+              </div>
             )}
           </div>
         </div>
