@@ -268,7 +268,7 @@ export function Navbar() {
 
             
             {showUserDropdown && (
-              <div className="absolute right-0 mt-4 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700">
+              <div className="absolute mt-4 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700" style={{ right: '5px' }}>
                 <button
                   onClick={() => {
                     setShowSettingsModal(true);
