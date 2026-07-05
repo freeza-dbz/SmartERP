@@ -14,7 +14,7 @@ export function SalesPage() {
     if (!selectedCompany) return;
     setLoading(true);
     try {
-      const response = await api.get(`/sales-vouchers?companyId=${selectedCompany.id}`);
+      const response = await api.get(`/sales-vouchers?companyId=${selectedCompany._id || selectedCompany.id}`);
       setSales(response.data.data);
     } catch {
       addToast({ type: 'error', title: 'Failed to fetch sales' });
@@ -139,8 +139,8 @@ function SalesVoucherModal({ open, onClose, onSave }: SalesVoucherModalProps) {
       const fetchData = async () => {
         try {
           const [customersRes, itemsRes] = await Promise.all([
-            api.get(`/ledgers/fetchLedgers?companyId=${selectedCompany.id}&type=CUSTOMER`),
-            api.get(`/stock-items?companyId=${selectedCompany.id}`)
+            api.get(`/ledgers/fetchLedgers?companyId=${selectedCompany._id || selectedCompany.id}&type=CUSTOMER`),
+            api.get(`/stock-items?companyId=${selectedCompany._id || selectedCompany.id}`)
           ]);
           setCustomers(customersRes.data.data.map((c: any) => ({ value: c.id, label: c.name })));
           setStockItems(itemsRes.data.data.map((i: any) => ({ value: i.id, label: i.name, rate: i.sellingPrice })));
@@ -182,7 +182,7 @@ function SalesVoucherModal({ open, onClose, onSave }: SalesVoucherModalProps) {
     try {
       const payload = {
         ...formData,
-        companyId: selectedCompany.id,
+        companyId: selectedCompany._id || selectedCompany.id,
         customerId: parseInt(formData.customerId),
         totalAmount,
         items: formData.items.map(item => ({
@@ -260,7 +260,7 @@ export function PurchasesPage() {
     if (!selectedCompany) return;
     setLoading(true);
     try {
-      const response = await api.get(`/purchase-vouchers?companyId=${selectedCompany.id}`);
+      const response = await api.get(`/purchase-vouchers?companyId=${selectedCompany._id || selectedCompany.id}`);
       setPurchases(response.data.data);
     } catch {
       addToast({ type: 'error', title: 'Failed to fetch purchases' });
@@ -352,8 +352,8 @@ function PurchaseVoucherModal({ open, onClose, onSave }: PurchaseVoucherModalPro
       const fetchData = async () => {
         try {
           const [suppliersRes, itemsRes] = await Promise.all([
-            api.get(`/ledgers/fetchLedgers?companyId=${selectedCompany.id}&type=SUPPLIER`),
-            api.get(`/stock-items?companyId=${selectedCompany.id}`)
+            api.get(`/ledgers/fetchLedgers?companyId=${selectedCompany._id || selectedCompany.id}&type=SUPPLIER`),
+            api.get(`/stock-items?companyId=${selectedCompany._id || selectedCompany.id}`)
           ]);
           setSuppliers(suppliersRes.data.data.map((s: any) => ({ value: s.id, label: s.name })));
           setStockItems(itemsRes.data.data.map((i: any) => ({ value: i.id, label: i.name, rate: i.purchasePrice })));
@@ -395,7 +395,7 @@ function PurchaseVoucherModal({ open, onClose, onSave }: PurchaseVoucherModalPro
     try {
       const payload = {
         ...formData,
-        companyId: selectedCompany.id,
+        companyId: selectedCompany._id || selectedCompany.id,
         supplierId: parseInt(formData.supplierId),
         totalAmount,
         items: formData.items.map(item => ({

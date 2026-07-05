@@ -59,7 +59,7 @@ export function DashboardPage() {
     if (selectedCompany) {
       const fetchSummary = async () => {
         try {
-          const response = await api.get(`/dashboard/summary?companyId=${selectedCompany.id}`);
+          const response = await api.get(`/dashboard/summary?companyId=${selectedCompany._id || selectedCompany.id}`);
           const summary = response.data.data;
           setStats([
             { title: "Today's Sales", value: summary.todaysSales, prefix: '₹', icon: <DollarSign className="w-6 h-6" />, page: 'sales' },

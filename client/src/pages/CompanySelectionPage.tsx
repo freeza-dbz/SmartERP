@@ -91,20 +91,20 @@ export function CompanySelectionPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {companies.map((company) => (
-              <Card key={company.id} hoverable onClick={() => handleSelectCompany(company)}>
+              <Card key={company._id || company.id} hoverable onClick={() => handleSelectCompany(company)}>
                 <CardContent className="relative">
                   <div className="absolute top-4 right-4">
                     <div className="relative">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowMenu(showMenu === company.id ? null : company.id);
+                          setShowMenu(showMenu === (company._id || company.id) ? null : (company._id || company.id));
                         }}
                         className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
                       >
                         <MoreVertical className="w-4 h-4 text-slate-400" />
                       </button>
-                      {showMenu === company.id && (
+                      {showMenu === (company._id || company.id) && (
                         <>
                           <div
                             className="fixed inset-0 z-10"
@@ -123,7 +123,7 @@ export function CompanySelectionPage() {
                             </button>
                             <button
                               className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-600 text-error-600 dark:text-error-400"
-                              onClick={() => setConfirmDelete(company.id)}
+                              onClick={() => setConfirmDelete(company._id || company.id)}
                             >
                               <Trash2 className="w-4 h-4" />
                               Delete
@@ -191,7 +191,7 @@ export function CompanySelectionPage() {
         onSave={async (formData) => {
           try {
             if (editingCompany) {
-              await api.put(`/company/${editingCompany.id}/update`, formData);
+              await api.put(`/company/${editingCompany._id || editingCompany.id}/update`, formData);
               addToast({ type: 'success', title: 'Company Updated' });
             } else {
               await api.post('/company/register', formData);

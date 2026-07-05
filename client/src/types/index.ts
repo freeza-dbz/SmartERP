@@ -6,6 +6,7 @@ export interface User {
 }
 
 export interface Company {
+  _id?: string;
   id: string;
   name: string;
   address: string;
