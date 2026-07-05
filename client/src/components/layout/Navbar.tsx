@@ -266,9 +266,19 @@ export function Navbar() {
               <ChevronDown className="w-4 h-4 text-slate-500" />
             </button>
 
-            {/* Dropdown menu – Profile button removed */}
+            
             {showUserDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700">
+              <div className="absolute right-0 mt-4 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={() => {
+                    setShowSettingsModal(true);
+                    setShowUserDropdown(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                >
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </button>
                 <button
                   onClick={() => {
                     // logout logic here
