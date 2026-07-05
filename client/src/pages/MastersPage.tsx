@@ -14,6 +14,7 @@ interface Ledger {
 }
 
 interface Unit {
+  _id?: string;
   id: number;
   name: string;
   shortName: string;
@@ -21,6 +22,7 @@ interface Unit {
 }
 
 interface StockGroup {
+  _id?: string;
   id: number;
   name: string;
   parentId?: number;
@@ -29,6 +31,7 @@ interface StockGroup {
 }
 
 interface StockItem {
+  _id?: string;
   id: number;
   name: string;
   sku?: string;
@@ -587,8 +590,8 @@ export function StockItemsPage() {
             sellingPrice: parseFloat(formData.sellingPrice) || 0,
             gstRate: parseFloat(formData.gstRate) || 0,
             openingStock: parseFloat(formData.openingStock) || 0,
-            unitId: parseInt(formData.unitId),
-            groupId: parseInt(formData.groupId),
+            unitId: formData.unitId,
+            groupId: formData.groupId,
             companyId: companyId,
           };
 
@@ -661,8 +664,8 @@ function StockItemModal({ open, onClose, item, units, stockGroups, onSave }: Sto
         sellingPrice: item.sellingPrice.toString(),
         gstRate: item.gstRate.toString(),
         openingStock: item.openingStock.toString(),
-        unitId: item.unitId.toString(),
-        groupId: item.groupId.toString(),
+        unitId: (item.unit?._id || item.unitId || '').toString(),
+        groupId: (item.stockGroup?._id || item.groupId || '').toString(),
       });
     } else {
       setFormData({
@@ -672,8 +675,8 @@ function StockItemModal({ open, onClose, item, units, stockGroups, onSave }: Sto
         sellingPrice: '0',
         gstRate: '18',
         openingStock: '0',
-        unitId: units[0]?.id.toString() || '',
-        groupId: stockGroups[0]?.id.toString() || '',
+        unitId: (units[0]?._id || units[0]?.id || '').toString(),
+        groupId: (stockGroups[0]?._id || stockGroups[0]?.id || '').toString(),
       });
     }
   }, [item, open, units, stockGroups]);
@@ -734,15 +737,9 @@ function StockItemModal({ open, onClose, item, units, stockGroups, onSave }: Sto
           required
           value={formData.unitId}
           onChange={e => setFormData({ ...formData, unitId: e.target.value })}
-          options={units.map(u => ({ value: u.id.toString(), label: `${u.name} (${u.shortName})` }))}
+          options={units.map(u => ({ value: (u._id || u.id).toString(), label: `${u.name} (${u.shortName})` }))}
         />
-        <Select
-          label="Stock Group"
-          required
-          value={formData.groupId}
-          onChange={e => setFormData({ ...formData, groupId: e.target.value })}
-          options={stockGroups.map(g => ({ value: g.id.toString(), label: g.name }))}
-        />
+
       </div>
       <div className="flex justify-end gap-3 mt-6">
         <Button variant="secondary" onClick={onClose}>Cancel</Button>

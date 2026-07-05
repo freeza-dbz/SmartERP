@@ -78,43 +78,7 @@ export function Navbar() {
           )}
         </div>
 
-        <button
-          onClick={() => setShowNotifications(!showNotifications)}
-          className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
-        >
-          <Bell className="w-5 h-5 text-slate-500 dark:text-slate-400" />
-          {notifications.filter(n => n.unread).length > 0 && (
-            <span className="absolute top-1 right-1 w-2 h-2 bg-error-500 rounded-full" />
-          )}
-        </button>
 
-        {showNotifications && (
-          <>
-            <div className="fixed inset-0 z-10" onClick={() => setShowNotifications(false)} />
-            <div className="absolute top-full right-16 mt-1 w-80 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-lg z-20">
-              <div className="p-3 border-b border-slate-200 dark:border-slate-700">
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100">Notifications</h3>
-              </div>
-              <div className="max-h-80 overflow-y-auto">
-                {notifications.map(n => (
-                  <div
-                    key={n.id}
-                    className={`p-3 border-b border-slate-100 dark:border-slate-700 last:border-0 ${n.unread ? 'bg-primary-50/50 dark:bg-primary-900/10' : ''}`}
-                  >
-                    <p className="font-medium text-sm text-slate-900 dark:text-slate-100">{n.title}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{n.message}</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{n.time}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="p-2 border-t border-slate-200 dark:border-slate-700">
-                <button className="w-full text-center text-sm text-primary-600 dark:text-primary-400 hover:underline">
-                  View all notifications
-                </button>
-              </div>
-            </div>
-          </>
-        )}
 
         <button
           onClick={toggleDarkMode}
