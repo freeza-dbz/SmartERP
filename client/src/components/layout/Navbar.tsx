@@ -54,10 +54,10 @@ function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }
     setSaving(true);
     try {
       const payload: Record<string, string> = {};
-      if (formData.fullName)      payload.fullName        = formData.fullName;
-      if (formData.username)      payload.username        = formData.username;
-      if (formData.email)         payload.email           = formData.email;
-      if (formData.newPassword)   payload.newPassword     = formData.newPassword;
+      if (formData.fullName) payload.fullName = formData.fullName;
+      if (formData.username) payload.username = formData.username;
+      if (formData.email) payload.email = formData.email;
+      if (formData.newPassword) payload.newPassword = formData.newPassword;
       if (formData.currentPassword) payload.currentPassword = formData.currentPassword;
 
       const token = localStorage.getItem('token');
@@ -257,7 +257,7 @@ export function Navbar() {
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Administrator</p>
               </div>
-              </>
+            </>
             )}
           </div>
         </div>
